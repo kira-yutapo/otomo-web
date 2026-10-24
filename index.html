@@ -786,7 +786,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.0";
+const APPV="0.62.1";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -1790,7 +1790,7 @@ async function ghCall(m,u,body,tk){
 function ghErr(r,w){const st=r.status,m=r.json&&r.json.message?" ("+r.json.message+")":"",mm=String(r.json&&r.json.message||"");
  if(st===404&&/No commit found|Branch .* not found|No ref found/i.test(mm))return "ブランチが見つかりません。設定のブランチ名を確かめてください(古いリポジトリは master のことがあります)。"+m;
  if(st===409&&/empty/i.test(mm))return "リポジトリが空です。GitHubの画面で、先にファイルを1つ作ってから(READMEなど)、もう一度ためしてください。"+m;
- if(st===404&&w==="repo")return "リポジトリが見つかりません。名前(ユーザー名/名前)と、トークンの対象のリポジトリを確かめてください。"+m;
+ if(st===404&&w==="repo")return "リポジトリが見つかりません。使った名前: 「"+((S.sync&&S.sync.repo)||"")+"」。名前(ユーザー名/名前)を確かめ、トークンの「Repository access」で「Only select repositories」にして、このリポジトリを選んであるか(公開のみ、のままだと非公開は見えません)確かめてください。"+m;
  if(st===401)return "トークンが正しくないか、期限が切れています。"+m;if(st===403)return "権限が足りないか、回数の制限です。"+m;
  if(st===404)return "リポジトリ・ブランチ・ファイルが見つかりません(トークンの対象リポジトリも確かめてください)。"+m;
  if(st===409||st===422)return "GitHub側が先に変わっています。履歴を読みなおしてから、もう一度送ってください。"+m;return "うまくいきません: HTTP "+st+m}
@@ -1897,10 +1897,10 @@ async function synRun(quiet){const sy=S.sync;
 function synDlg(){const y=S.sync=S.sync||{};y.on=y.on||{};
  const cats=SYC.filter(c=>c.id!=="scen"||(S.feat||{}).scen!==false);
  openDlg('<div class="sec">GitHubで同期(上級者向け)</div><div class="hint">GitHubの「非公開(Private)」のリポジトリに、選んだデータだけを置いて、アプリ版とブラウザ版でそろえます。画像・お金・依頼・設定は同期しません。</div>'
-  +'<label class="fl" for="sy_repo">データを置くリポジトリ(ユーザー名/名前)</label><input type="text" id="sy_repo" value="'+esc(y.repo||"")+'" placeholder="例 name/otomo-data">'
-  +'<label class="fl" for="sy_br">ブランチ</label><input type="text" id="sy_br" value="'+esc(y.branch||"main")+'">'
-  +'<label class="fl" for="sy_dir">入れるフォルダ(リポジトリの中)</label><input type="text" id="sy_dir" value="'+esc(y.dir||"otomo-data")+'">'
-  +'<label class="fl" for="sy_tk">トークン('+(ghTok()?"保存ずみ。変えるときだけ入れる":"まだありません")+')</label><input type="password" id="sy_tk" value="" placeholder="github_pat_..." autocomplete="off">'
+  +'<label class="fl" for="sy_repo">データを置くリポジトリ(ユーザー名/名前)</label><input type="text" id="sy_repo" autocapitalize="off" autocorrect="off" spellcheck="false" value="'+esc(y.repo||"")+'" placeholder="例 name/otomo-data">'
+  +'<label class="fl" for="sy_br">ブランチ</label><input type="text" id="sy_br" autocapitalize="off" autocorrect="off" spellcheck="false" value="'+esc(y.branch||"main")+'">'
+  +'<label class="fl" for="sy_dir">入れるフォルダ(リポジトリの中)</label><input type="text" id="sy_dir" autocapitalize="off" autocorrect="off" spellcheck="false" value="'+esc(y.dir||"otomo-data")+'">'
+  +'<label class="fl" for="sy_tk">トークン('+(ghTok()?"保存ずみ。変えるときだけ入れる":"まだありません")+')</label><input type="password" id="sy_tk" autocapitalize="off" autocorrect="off" spellcheck="false" value="" placeholder="github_pat_..." autocomplete="off">'
   +'<div class="sec">同期するもの</div>'+cats.map(c=>'<label class="chk"><input type="checkbox" id="sy_c_'+c.id+'"'+(y.on[c.id]?" checked":"")+'> '+c.nm+'</label>').join("")
   +'<label class="chk"><input type="checkbox" id="sy_auto"'+(y.auto?" checked":"")+'> 起動したときに、自動で同期する</label>'
   +'<div class="hint" id="sy_st">'+esc(y.last?"前回: "+new Date(y.last).toLocaleString("ja-JP")+(y.err?"(失敗: "+y.err+")":""):"まだ同期していません")+'</div>'
