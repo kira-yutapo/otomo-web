@@ -795,7 +795,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.6";
+const APPV="0.62.7";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -2078,7 +2078,7 @@ function scEditPage(){
   +'<span class="snw">'+ib("scsn","snip","スニペット","sm")+'</span>'+ib("scflow","flow","フローチャート(カードに書いたことが、本文にも出ます)。もう一度押すと、執筆画面にもどります","sm"+(flOpen()?" on":""))+sep+dots+'<span class="sp"></span><span class="cnt"><span id="scnt">'+scCnt(s)+'</span></span></div><div class="tbr t2">'
   +'<span class="vs">'+[["lw","edit","編集","書き出しに近い見た目のまま、つづけて書く(右クリックで、書式・囲み枠・スニペット)"],["wr","code","文字","記号が見える、ふつうの入力欄(うまく動かないときに)"],["pv","eye","見た目","読むだけ(書き出しの見た目)"]].map(o=>'<button class="ib vsb'+(v===o[0]?" on":"")+'" data-act="scview" data-v="'+o[0]+'" title="'+o[3]+'">'+ic(o[1])+'<span>'+o[2]+'</span></button>').join("")+'</span>'
   +ib("scsplit","cols","編集と見た目を、横にならべる(「編集」のとき)","sm"+(E.sp?" on":""))+ib("scfont","set","文字の設定(書体・大きさ・行間)","sm")+ib("sckeys","key","ショートカットの設定(シナリオ執筆だけ)","sm")+ib("sclook","pal","書き出しの見た目・表紙","sm")+ib("scdsn","brush","デザインを選ぶ・CSSを取り込む","sm"+(S.dsn.pre||S.dsn.css?" on":""))+ib("scdk","moon","ダークモード(画面ぜんたい)","sm"+(E.dark?" on":""))+ib("sccopy","copy","全文をコピー","sm")+ib("scbk","dl","シナリオ全部のバックアップ(保存・取り込み)","sm")+'<span class="sp"></span>'
-  +'<button class="ib scoutb" data-act="scout" title="書き出し(HTML・PDFなど)。書き出すたびに、名前にv1,v2…が付き、履歴にも残ります">'+ic("file")+'<span>書き出し</span></button>'+ib("sclp","pnl-l","目次を出す・しまう","sm"+(E.lc?" on":""))+ib("scrp","pnl-r","右の道具を出す・しまう","sm"+(E.rc?" on":""))+(window.api?'<button class="ib sm'+(S.pin?" on":"")+'" data-act="pin" title="最前面:'+(S.pin?"オン":"オフ")+'">'+ic("pin")+'</button>':"")+ib("scfull","max","全画面にする","sm"+(scFull?" on":""))+ib("screstore","min","元の大きさにもどす","sm"+(scFull?"":" on"))+'</div>';
+  +'<button class="ib scoutb" data-act="scout" title="書き出し(HTML・PDFなど)。書き出すたびに、名前にv1,v2…が付き、履歴にも残ります">'+ic("file")+'<span>書き出し</span></button>'+ib("sclp","pnl-l","目次を出す・しまう","sm"+(E.lc?" on":""))+ib("scrp","pnl-r","右の道具を出す・しまう","sm"+(E.rc?" on":""))+(window.api?'<button class="ib sm'+(S.pin?" on":"")+'" data-act="pin" title="最前面:'+(S.pin?"オン":"オフ")+'">'+ic("pin")+'</button>':"")+ib("scfull","max",scFull?"全画面を解除する(もう一度押すと、元の大きさにもどります)":"全画面にする","sm"+(scFull?" on":""))+ib("screstore","min","元の大きさにもどす","sm"+(scFull?"":" on"))+'</div>';
  scFLoad(scBase());const tabs=scTabsHtml();
  const spv=(v==="wr"||v==="lw")&&E.sp,pvCls='paper'+((E.dark?" dk":"")+(E.look==="book"?" lk-book":""));
  const C=(v==="wr"||v==="lw")?(spv?'<div class="scsp">':'')+'<div class="paper'+((E.dark?" dk":"")+(E.look==="book"?" lk-book":""))+'" id="scwr" style="'+esc(scBl())+'"><div class="pg" id="scwrp">'+(v==="lw"?'<div id="sc_body" class="lvv" contenteditable="plaintext-only" spellcheck="false" data-ph="# 見出し / **太字** / [[見出し名]] / ---">'+lvLines(s.body)+'</div>':'<textarea id="sc_body" class="srcta fit" placeholder="# 見出し / **太字** / [[見出し名]] / ---">\n'+esc(s.body)+'</textarea>')+'</div></div>'+(spv?'<div class="'+pvCls+'" id="scsplv" style="'+esc(scBl())+'"><div class="pg">'+scPvHtml(s.body)+'</div></div></div>':'')
@@ -3266,7 +3266,7 @@ document.addEventListener("click",e=>{
   case"scltab":unfocus();scLTab=a.dataset.v;if(scLTab==="img")fimgList(false);cache.page=null;render();return;
   case"scswitch":unfocus();scFReset();S.scenCur=id;if(!S.scOpen.includes(id))S.scOpen.push(id);cache.page=null;change();return;
   case"sckeys":scKeyDlg();return;
-  case"scfull":unfocus();if(!scFull)enterFull();change();setTimeout(flPlace,30);return;
+  case"scfull":unfocus();if(scFull)exitFull();else enterFull();change();setTimeout(flPlace,30);return;
   case"screstore":unfocus();exitFull();change();setTimeout(flPlace,30);return;
   case"sclook":return scLookDlg();
   case"scfont":return scFontDlg();
