@@ -57,7 +57,7 @@ if(window.__TAURI__&&window.__TAURI__.window){const T=window.__TAURI__,W=T.windo
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
 <title>おとも手帖(ブラウザ版)</title>
-<script>try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}</script>
+<script>try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}if("serviceWorker" in navigator&&/^https?:/.test(location.protocol))addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})</script>
 <style>
 :root{--cardbg:var(--card);color-scheme:light;--bg:#cfc3b3;--card:#efe8de;--tx:#2c2320;--ac:#7d4033;--on:#fff;--warn:#b4452c;--cs:160px;--ff:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;--fs:15px;--line:color-mix(in srgb,var(--tx) 26%,transparent);--sub:color-mix(in srgb,var(--tx) 64%,var(--card))}
 *{box-sizing:border-box}
@@ -786,7 +786,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.61.0";
+const APPV="0.62.0";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -1833,15 +1833,15 @@ function synUnion(a,b){const o={};new Set(Object.keys(a).concat(Object.keys(b)))
 /* 3方向のまとめ方: L=この端末 B=前回の同期のとき R=GitHub。変えたほうを採用。両方変えたら、新しいほう(競合)を採用し、負けたほうは(競合)の名前でコピーを残す */
 function synMerge(L,B,R,cp){const out={},conf=[];let dlL=0,dlR=0;
  const ks=new Set(Object.keys(L).concat(Object.keys(B),Object.keys(R)));
- ks.forEach(k=>{const l=L[k],r=R[k],b=B[k],hl=l?synHash(l):null,hr=r?synHash(r):null;
+ ks.forEach(k=>{const l=L[k],r=R[k],bb=[].concat(B[k]===undefined?[]:B[k]),b=bb.length?bb[0]:undefined,hl=l?synHash(l):null,hr=r?synHash(r):null,isl=bb.includes(hl),isr=bb.includes(hr);
   if(hl===hr){if(l)out[k]=l;return}
-  if(l&&r){if(b===hl)out[k]=r;else if(b===hr)out[k]=l;
+  if(l&&r){if(isl)out[k]=r;else if(isr)out[k]=l;
    else if(k==="_x")out[k]=synUnion(l,r);
    else{const nl=(l.upd||0)>(r.upd||0);out[k]=nl?l:r;conf.push(k);
     if(cp){const lo=nl?r:l,nm=k.split(":")[0],o=synCl(lo);o.id=uid();if(o.title!=null)o.title=String(o.title||"無題")+"(競合)";o.upd=Date.now();out[nm+":"+o.id]=o}}
    return}
-  if(l){if(b===undefined)out[k]=l;else if(b===hl)dlL++;else out[k]=l;return}
-  if(r){if(b===undefined)out[k]=r;else if(b===hr)dlR++;else out[k]=r}});
+  if(l){if(b===undefined)out[k]=l;else if(isl)dlL++;else out[k]=l;return}
+  if(r){if(b===undefined)out[k]=r;else if(isr)dlR++;else out[k]=r}});
  return{out,conf,dlL,dlR}}
 function synApply(c,out){c.lists.forEach(l=>{const nm=l[0],loc=l[1],cur=S[nm]||[],old=new Map(cur.map(x=>[x.id,x]));
  const keep=cur.filter(x=>out[nm+":"+x.id]).map(x=>{const o=synCl(out[nm+":"+x.id]);loc.forEach(k=>{if(x[k]!==undefined)o[k]=x[k]});return o});
@@ -1896,7 +1896,7 @@ async function synRun(quiet){const sy=S.sync;
  if(!quiet||errMsg||sum.conf||sum.skip.length)notice(line+(sum.conf?"\n新しいほうを採用して、もう一方は「(競合)」の名前でコピーを残しました。":""))}
 function synDlg(){const y=S.sync=S.sync||{};y.on=y.on||{};
  const cats=SYC.filter(c=>c.id!=="scen"||(S.feat||{}).scen!==false);
- openDlg('<div class="sec">同期(アプリ版とブラウザ版)</div><div class="hint">GitHubの「非公開(Private)」のリポジトリに、選んだデータだけを置いて、アプリ版とブラウザ版でそろえます。画像・お金・依頼・設定は同期しません。</div>'
+ openDlg('<div class="sec">GitHubで同期(上級者向け)</div><div class="hint">GitHubの「非公開(Private)」のリポジトリに、選んだデータだけを置いて、アプリ版とブラウザ版でそろえます。画像・お金・依頼・設定は同期しません。</div>'
   +'<label class="fl" for="sy_repo">データを置くリポジトリ(ユーザー名/名前)</label><input type="text" id="sy_repo" value="'+esc(y.repo||"")+'" placeholder="例 name/otomo-data">'
   +'<label class="fl" for="sy_br">ブランチ</label><input type="text" id="sy_br" value="'+esc(y.branch||"main")+'">'
   +'<label class="fl" for="sy_dir">入れるフォルダ(リポジトリの中)</label><input type="text" id="sy_dir" value="'+esc(y.dir||"otomo-data")+'">'
@@ -1911,6 +1911,58 @@ function synDlg(){const y=S.sync=S.sync||{};y.on=y.on||{};
   try{const tv=$("sy_tk").value.trim();if(tv)localStorage.setItem(GHK,tv)}catch(e){}save(true)};
  $("dNo").onclick=closeDlg;$("dOk").onclick=()=>{sv();closeDlg();change()};
  $("sy_go").onclick=()=>{sv();synRun(false)}}
+
+/* ===== 同期ファイル(アカウント不要。ファイルか、コピーした文字で、端末どうしをそろえる) ===== */
+const synDev=()=>{S.devId=S.devId||uid();return S.devId};
+const synFcats=()=>{const y=S.sync=S.sync||{};y.fon=y.fon||{scen:true,todo:true,memo:true,wish:true};return SYC.filter(c=>y.fon[c.id]&&(c.id!=="scen"||(S.feat||{}).scen!==false))};
+function synPack(){const o={kind:"otomo-sync",v:1,dev:synDev(),at:Date.now(),data:{},known:{}};synFcats().forEach(c=>{o.data[c.id]={items:synLocal(c)}});const fb=(S.sync&&S.sync.fbase)||{};Object.keys(fb).forEach(d=>{o.known[d]=fb[d]});return o}
+/* 取り込み: 「そのファイルを書いた端末が、前回持っていたもの」を基準に、3方向でまとめる */
+async function synImport(pack){
+ if(!pack||pack.kind!=="otomo-sync"||!pack.data)return "同期ファイルではありません。";
+ if(pack.dev===synDev())return "この端末で書き出したファイルです。もう一方の端末で取り込んでください。";
+ const y=S.sync=S.sync||{};y.fbase=y.fbase||{};const src=String(pack.dev),sb=y.fbase[src]=y.fbase[src]||{};
+ const sum={down:0,conf:0,del:0,skip:[]};let changed=false;
+ for(const c of synFcats()){const d=pack.data[c.id];if(!d||typeof d.items!=="object")continue;
+  const R=d.items,L=synLocal(c),ob=sb[c.id]||{},kb=((pack.known||{})[synDev()]||{})[c.id]||{},B={};
+  Object.keys(ob).concat(Object.keys(kb)).forEach(k=>{B[k]=[ob[k],kb[k]].filter(Boolean)});
+  const m=synMerge(L,B,R,c.cp),nl=Object.keys(L).length;
+  if(m.dlL>=5&&m.dlL>nl/2){if(!(await synAsk(c.nm+"で、この端末の "+m.dlL+"件が消える取り込みです。続けますか?"))){sum.skip.push(c.nm);continue}}
+  if(synCanon(m.out)!==synCanon(L)){synApply(c,m.out);changed=true;
+   Object.keys(m.out).forEach(k=>{if(!L[k]||synHash(L[k])!==synHash(m.out[k]))sum.down++});sum.del+=m.dlL}
+  sum.conf+=m.conf.length;const nb={};Object.keys(R).forEach(k=>nb[k]=synHash(R[k]));sb[c.id]=nb}
+ const ks=Object.keys(y.fbase);if(ks.length>8)delete y.fbase[ks[0]];
+ y.fused=true;if(changed){cache.page=null;change()}else save();
+ return "取り込みました(受け取った "+sum.down+"件・消えた "+sum.del+"件"+(sum.conf?"・競合 "+sum.conf+"件":"")+")"+(sum.skip.length?"。見送り: "+sum.skip.join("、"):"")+(sum.conf?"\n新しいほうを採用して、もう一方は「(競合)」の名前でコピーを残しました。":"")+"\nこちらの変更をもう一方にも渡すには、こちらからも書き出して、もう一方で取り込んでください。"}
+const synStamp=()=>{const d=new Date();return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())};
+function synFileDlg(){const y=S.sync=S.sync||{};synFcats();
+ const cats=SYC.filter(c=>c.id!=="scen"||(S.feat||{}).scen!==false);
+ openDlg('<div class="sec">同期ファイル(アカウント不要)</div><div class="hint">選んだデータだけを、ファイルか文字にして、もう一方の端末へ渡します。渡す方法は、AirDrop・LINEの自分宛て・クラウドの共有フォルダなど、なんでもかまいません。画像・お金・依頼・設定は含みません。</div>'
+  +'<div class="sec">同期するもの</div>'+cats.map(c=>'<label class="chk"><input type="checkbox" id="sf_c_'+c.id+'"'+(y.fon[c.id]?" checked":"")+'> '+c.nm+'</label>').join("")
+  +'<div class="sec">渡す(書き出す)</div>'
+  +'<div class="dtr"><span>ファイルに書き出す</span><button class="ib sm" id="sf_ex" title="ファイルに書き出す">'+ic("ul")+'</button></div>'
+  +'<div class="dtr"><span>文字にしてコピーする</span><button class="ib sm" id="sf_cp" title="文字にしてコピーする(少ないデータ向け)">'+ic("copy")+'</button></div>'
+  +'<div class="sec">受け取る(取り込む)</div>'
+  +'<div class="dtr"><span>ファイルから取り込む</span><button class="ib sm" id="sf_im" title="ファイルから取り込む">'+ic("dl")+'</button><input type="file" id="sf_f" accept=".json,application/json,text/plain" hidden></div>'
+  +'<div class="dtr"><span>貼りつけて取り込む</span><button class="ib sm" id="sf_ps" title="貼りつけて取り込む">'+ic("memo")+'</button></div>'
+  +'<div class="hint" id="sf_st">取り込むと、変えたほうを採用して、両方で変えたときは新しいほうを残します(もう一方は「(競合)」のコピー)。消したものは、取り込んだ側でも消えます。</div>'
+  +'<div class="btns"><button class="ib" id="dNo" title="とじる">'+ic("x")+'</button></div>');
+ $("dNo").onclick=closeDlg;
+ const sv=()=>{y.fon={};cats.forEach(c=>{y.fon[c.id]=$("sf_c_"+c.id).checked});y.fused=true;save(true);return synFcats().length>0};
+ const need=()=>{if(!sv()){$("sf_st").textContent="同期するものを、1つ以上選んでください。";return false}return true};
+ $("sf_ex").onclick=async()=>{if(!need())return;const o=synPack();await dlFile("otomo-sync-"+synStamp()+".json",JSON.stringify(o),"application/json");$("sf_st").textContent="書き出しました。もう一方の端末で「ファイルから取り込む」を押してください。"};
+ $("sf_cp").onclick=()=>{if(!need())return;synTextDlg(JSON.stringify(synPack()))};
+ $("sf_im").onclick=()=>{if(!need())return;$("sf_f").click()};
+ $("sf_f").onchange=()=>{const f=$("sf_f").files[0];if(!f)return;const fr=new FileReader();fr.onload=async()=>{let o;try{o=JSON.parse(String(fr.result).replace(/^﻿/,""))}catch(e){$("sf_st").textContent="読み込めませんでした(同期ファイルではないようです)。";return}
+  const r=await synImport(o);notice(r)};fr.readAsText(f)};
+ $("sf_ps").onclick=()=>{if(!need())return;synTextDlg(null)}}
+function synTextDlg(text){const cp=text!=null;
+ openDlg('<div class="sec">'+(cp?"コピーして、もう一方の端末へ":"貼りつけて取り込む")+'</div><div class="hint">'+(cp?"下の文字を、ぜんぶコピーして、もう一方の端末の「貼りつけて取り込む」に貼ってください。データが多いと長くなります。多いときは、ファイルのほうが向いています。":"もう一方の端末でコピーした文字を、下に貼ってください。")+'</div>'
+  +'<textarea id="sx_t" rows="8" '+(cp?'readonly':'placeholder="ここに貼りつけ"')+' style="font-size:12px"></textarea><div class="hint" id="sx_st">'+(cp?Math.ceil(text.length/1024)+"KB":"")+'</div>'
+  +'<div class="btns"><button class="ib" id="dNo" title="とじる">'+ic("x")+'</button>'+(cp?'<button class="ib ok" id="sx_go" title="コピー">'+ic("copy")+'</button>':'<button class="ib ok" id="sx_go" title="取り込む">'+ic("check")+'</button>')+'</div>');
+ const t=$("sx_t");$("dNo").onclick=()=>{closeDlg();synFileDlg()};
+ if(cp){t.value=text;t.focus();t.select();$("sx_go").onclick=async()=>{try{await navigator.clipboard.writeText(text);$("sx_st").textContent="コピーしました。"}catch(e){t.focus();t.select();$("sx_st").textContent="自動でコピーできませんでした。選ばれている文字を、長押しやCtrl+Cでコピーしてください。"}}}
+ else $("sx_go").onclick=async()=>{let o;try{o=JSON.parse(t.value.trim())}catch(e){$("sx_st").textContent="読み込めませんでした。文字が途中で切れていないか確かめてください。";return}
+  const r=await synImport(o);notice(r)}}
 async function ghPush(s,msg,p){notice("送っています…");let sha,old=null;
  try{const g=ghC(s);let r=await ghCall("GET",ghUrl(p,"?ref="+encodeURIComponent(g.branch||"main"),s));
   if(r.status===200&&r.json&&r.json.sha){sha=r.json.sha;old=r.json.content!=null?ghB64d(r.json.content):null}else if(r.status!==404){notice(ghErr(r));return}
@@ -2606,7 +2658,7 @@ function head(id,full){const m=CM[id],pc=/^pic\d?$/.test(id);return '<div class=
 const dtabs=cur=>'<div class="dtabs">'+[["cards","grid","表示"],["feat","menu","機能"],["cal","cal","カレンダー"],["theme","pal","テーマ"],["set","set","その他"]].map(o=>'<button data-dt="'+o[0]+'" title="'+o[2]+'" class="'+(o[0]===cur?"on":"")+'">'+ic(o[1])+'<span>'+o[2]+'</span></button>').join("")+'</div>';
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#dlgbox .dtabs button");if(!b)return;e.stopImmediatePropagation();const k=b.dataset.dt;closeDlg();setTimeout(()=>k==="set"?settingsDlg():k==="cal"?settingsDlg("cal"):k==="theme"?themeDlg():k==="cards"?cardsDlg():featDlg(),0)},true);
 const sbot=()=>{const B=(id,act,icon,title,on)=>'<button id="'+id+'" data-act="'+act+'" class="'+(on?"on":"")+'" title="'+title+'">'+ic(icon)+'</button>';
- return '<div class="sbot">'+(window.api?B("bPin","pin","pin","最前面:"+(S.pin?"オン":"オフ"),S.pin):"")+B("bMini","bmini","mini","ミニモード")+B("bChar","bchar","user","キャラクター表示",S.charShow)+B("bCharSet","bchars","users","キャラクター設定")+(S.sync&&S.sync.repo?B("bSync","bsync","sync","同期"):"")+B("bSet","bset","set","設定")+'</div>'};
+ return '<div class="sbot">'+(window.api?B("bPin","pin","pin","最前面:"+(S.pin?"オン":"オフ"),S.pin):"")+B("bMini","bmini","mini","ミニモード")+B("bChar","bchar","user","キャラクター表示",S.charShow)+B("bCharSet","bchars","users","キャラクター設定")+(S.sync&&(S.sync.repo||S.sync.fused)?B("bSync","bsync","sync","同期"):"")+B("bSet","bset","set","設定")+'</div>'};
 function renderNav(){const h=NAV.filter(n=>n[0]==="home"||(!S.navHide[n[0]]&&(n[0]!=="scen"||S.feat.scen))).map(n=>'<button class="'+(S.view===n[0]?"on":"")+'" data-act="nav" data-v="'+n[0]+'" title="'+n[1]+'">'+ic(n[2])+'<span class="lb">'+n[1]+'</span></button>').join("")
  +'<div class="sep"></div><div class="tl">'+S.tools.map(t=>'<button class="'+(toolEd?"ed":"")+'" data-act="tool" data-id="'+t.id+'" title="'+esc(t.name)+(toolEd?"(編集)":"")+'">'+(IM["t"+t.id]?'<img data-img="t'+t.id+'" alt="">':ic(t.ico||"go"))+'<span class="lb">'+esc(t.name)+'</span></button>').join("")+'</div>'
  +'<div class="tact"><button data-act="add:tools" title="ツールを追加">'+ic("plus")+'<span class="lb">ツール追加</span></button>'+(S.tools.length?'<button data-act="tedmode" class="'+(toolEd?"on":"")+'" title="ツールを編集">'+ic("edit")+'<span class="lb">ツール編集</span></button>':'')+'</div>'+sbot();
@@ -2885,7 +2937,7 @@ function settingsDlg(pg){
  +'<div class="hint mgrl">'+(S.mgrDir?'この中に、次のフォルダが作られます:':'決めると、この中に次のフォルダが作られます:')+'<br>┣ 本体のバックアップ(全データ)<br>┣ シナリオのバックアップ<br>┣ メモのバックアップ(メモを書くたびに、.mdで保存)<br>┗ 画像(取りこんだ画像)</div>'
  +(S.mgrDir?'<div class="dtr"><span>管理フォルダを開く</span><button class="ib sm" id="s_mgro" title="フォルダを開く">'+ic("go")+'</button></div>':'')
  +(!S.mgrDir&&(S.bkDir||S.mmDir||S.imgDir)?'<div class="hint">前の設定: '+esc([S.bkDir&&"バックアップ "+S.bkDir,S.mmDir&&"メモ "+S.mmDir,S.imgDir&&"画像 "+S.imgDir].filter(Boolean).join(" / "))+'<br>管理フォルダを決めると、まとめて置きかわります。</div>':'')
- +'<div class="sec">同期(アプリ版とブラウザ版)</div><div class="dtr"><span>同期の設定をひらく</span><button class="ib sm" id="s_sync" title="同期の設定">'+ic("sync")+'</button></div>'
+ +'<div class="sec">同期</div><div class="dtr"><span>同期ファイル(アカウント不要)</span><button class="ib sm" id="s_syncf" title="同期ファイルで、別の端末とそろえる">'+ic("sync")+'</button></div><div class="dtr"><span>GitHubで同期(上級者向け)</span><button class="ib sm" id="s_sync" title="GitHubで同期する設定">'+ic("sync")+'</button></div>'
  +'<div class="fx-gh"><div class="sec">GitHub(シナリオを送る先)</div>'
  +'<label class="fl" for="s_ghr">共通のリポジトリ(ユーザー名/名前)。シナリオごとに変えることもできます</label><input type="text" id="s_ghr" value="'+esc((S.gh||{}).repo||"")+'" placeholder="例 name/scenario">'
  +'<label class="fl" for="s_ghb">ブランチ</label><input type="text" id="s_ghb" value="'+esc((S.gh||{}).branch||"main")+'">'
@@ -2942,7 +2994,7 @@ function settingsDlg(pg){
   S.gh={repo:$("s_ghr").value.trim().replace(/^https?:\/\/github\.com\//i,"").replace(/\.git$/i,"").replace(/^\/+|\/+$/g,""),branch:$("s_ghb").value.trim()||"main",dir:$("s_ghd").value.trim().replace(/^\/+|\/+$/g,"")};
   try{const tv=$("s_ght").value.trim();if(tv)localStorage.setItem(GHK,tv);else if($("s_ghx")&&$("s_ghx").checked)localStorage.removeItem(GHK)}catch(e){}
   applyFont();closeDlg();change();gSync(false)};
- $("s_sync").onclick=()=>synDlg();
+ $("s_sync").onclick=()=>synDlg();$("s_syncf").onclick=()=>synFileDlg();
  $("s_ghtest").onclick=async()=>{const e=$("sErr");const repo=$("s_ghr").value.trim().replace(/^https?:\/\/github\.com\//i,"").replace(/\.git$/i,"").replace(/^\/+|\/+$/g,""),tv=$("s_ght").value.trim()||ghTok();
   if(!repo||!tv){e.textContent="リポジトリとトークンを入れてください。";return}
   e.textContent="確かめています…";try{const r=await ghCall("GET","https://api.github.com/repos/"+repo,null,tv);
@@ -3130,7 +3182,7 @@ document.addEventListener("click",e=>{
  if(act.startsWith("ed:")){const k=act.slice(3);if(k==="timer")tpDlg();else if(k==="req")rqCfgDlg();else if(k.indexOf("pic")===0)picDlg(k);else if(k==="todoall"||k==="todo")tsetDlg();else{const c=curC();if(c)charForm(c)}return}
  if(act.startsWith("dadd:")){const k=act.slice(5);if(k==="ev")evForm(null,cal.sel);else todoForm(null,cal.sel);return}
  switch(act){
-  case"stampgo":return stampPress(id);case"stampdel":delete S.stampLog[id||today()];change();return;case"bchars":return charDlg();case"bsync":synRun(false);return;case"bchar":S.charShow=!S.charShow;change();return;case"bmini":return enterMini();case"btheme":return themeDlg();case"bset":return cardsDlg();
+  case"stampgo":return stampPress(id);case"stampdel":delete S.stampLog[id||today()];change();return;case"bchars":return charDlg();case"bsync":if(S.sync&&S.sync.repo)synRun(false);else synFileDlg();return;case"bchar":S.charShow=!S.charShow;change();return;case"bmini":return enterMini();case"btheme":return themeDlg();case"bset":return cardsDlg();
   case"nav":return go(a.dataset.v);
   case"tpnext":{const i=S.tp.findIndex(p=>p.id===S.tpCur);S.tpCur=S.tp[(i+1)%S.tp.length].id;applyPreset();change();return}
   case"tplay":return tplay();case"treset":return treset();case"tskip":return tskip();
