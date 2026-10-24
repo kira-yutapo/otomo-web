@@ -795,7 +795,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.3";
+const APPV="0.62.4";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -1670,7 +1670,7 @@ function catAllDlg(start){
  const K=[
   {k:"t",l:"TODO",get:()=>S.tcat,ac:0,cl:1},
   {k:"m",l:"メモ",get:()=>S.mmcat,ac:0,cl:1},
-  {k:"w",l:"ウィッシュ",get:()=>S.wantcat,ac:0,cl:1},
+  {k:"w",l:"やりたいこと",get:()=>S.wantcat,ac:0,cl:1},
   {k:"k",l:"金銭",get:()=>S.mcat,ac:1,cl:1}];
  const L={};K.forEach(x=>{L[x.k]=x.get().map(n=>({o:n,n,a:x.ac?A(n):"",c:x.cl?ccol(x.k,n):""}))});
  let cur=K.some(x=>x.k===start)?start:"t",swI=-1;const CSW=PAL.concat(["#6b6b6b","#3f5f7a","#9a5a2b","#4a7a6a","#7a3a4a","#555f3a"]);
@@ -1829,15 +1829,18 @@ const SYC=[
  {id:"scen",nm:"シナリオ",lists:[["scen",["dir"]],["sfold",[]]],ext:null,cp:true},
  {id:"todo",nm:"TODO",lists:[["todos",[]]],ext:["tcat","tcol"],cp:false},
  {id:"memo",nm:"メモ",lists:[["memos",[]]],ext:["mmcat","mmcol"],cp:true},
- {id:"wish",nm:"ウィッシュリスト",lists:[["wl",[]]],ext:["wantcat","wcol","wlGoal"],cp:false},
+ {id:"wish",nm:"やりたいこと",lists:[["wl",[]]],ext:["wantcat","wcol","wlGoal"],cp:false},
  {id:"tw",nm:"ひとこと",lists:[["tweets",[]]],ext:null,cp:false},
- {id:"chr",nm:"キャラクター(画像・セリフ)",lists:[["chars",[]]],ext:null,cp:false,img:true}];
+ {id:"chr",nm:"キャラクター(画像・セリフ)",lists:[["chars",[]]],ext:null,cp:false,img:true},
+ {id:"hab",nm:"習慣(記録つき)",lists:[["habits",[]]],ext:null,cp:false,hl:true},
+ {id:"wsh",nm:"ウィッシュリスト(金額つき)",lists:[["wish",[]]],ext:null,cp:false}];
 const synImgKeys=()=>{const ids=new Set((S.chars||[]).map(c=>c.id));return Object.keys(IM).filter(k=>ids.has(k.split(".")[0])&&k.split(".")[0]!=="smp1"&&typeof IM[k]==="string"&&/^data:image\//.test(IM[k]))};
 const synCanon=o=>{if(Array.isArray(o))return"["+o.map(synCanon).join(",")+"]";if(o&&typeof o==="object")return"{"+Object.keys(o).sort().filter(k=>o[k]!==undefined).map(k=>JSON.stringify(k)+":"+synCanon(o[k])).join(",")+"}";const t=JSON.stringify(o);return t===undefined?"null":t};
 const synHash=o=>{const t=synCanon(o);let h=2166136261;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+"."+t.length.toString(36)};
 const synCl=o=>JSON.parse(JSON.stringify(o));
 function synLocal(c){const m={};c.lists.forEach(l=>{(S[l[0]]||[]).forEach(it=>{if(!it||it.id==null)return;const o=synCl(it);l[1].forEach(k=>delete o[k]);m[l[0]+":"+it.id]=o})});
  if(c.img)synImgKeys().forEach(k=>{m["img:"+k]={id:k,d:IM[k]}});
+ if(c.hl)(S.habits||[]).forEach(h=>{const e=m["habits:"+h.id];if(e)e._lg=synCl((S.hlog||{})[h.id]||{})});
  if(c.ext){const x={};c.ext.forEach(k=>{if(S[k]!==undefined)x[k]=synCl(S[k])});m._x=x}return m}
 function synUnion(a,b){const o={};new Set(Object.keys(a).concat(Object.keys(b))).forEach(k=>{const x=a[k],y=b[k];
  if(x===undefined)o[k]=y;else if(y===undefined)o[k]=x;
@@ -1861,6 +1864,7 @@ function synApply(c,out){c.lists.forEach(l=>{const nm=l[0],loc=l[1],cur=S[nm]||[
  const have=new Set(keep.map(x=>x.id));
  Object.keys(out).forEach(k=>{if(k.indexOf(nm+":")!==0)return;const o=synCl(out[k]);if(have.has(o.id))return;loc.forEach(q=>{o[q]=(old.get(o.id)||{})[q]!==undefined?old.get(o.id)[q]:""});keep.push(o)});
  S[nm]=keep});
+ if(c.hl){S.hlog=S.hlog||{};const hs=new Set();(S.habits||[]).forEach(h=>{hs.add(h.id);S.hlog[h.id]=h._lg&&typeof h._lg==="object"?h._lg:{};delete h._lg});Object.keys(S.hlog).forEach(k=>{if(!hs.has(k))delete S.hlog[k]})}
  if(c.img){const ids=new Set((S.chars||[]).map(x=>x.id));
   Object.keys(IM).forEach(k=>{if(ids.has(k.split(".")[0])&&k.split(".")[0]!=="smp1"&&typeof IM[k]==="string"&&/^data:image\//.test(IM[k])&&!out["img:"+k]){delete IM[k];delete IMR[k]}});
   Object.keys(out).forEach(k=>{if(k.indexOf("img:")!==0)return;const o=out[k];if(o&&o.id&&typeof o.d==="string"&&ids.has(String(o.id).split(".")[0])){IM[o.id]=o.d;delete IMR[o.id]}});
@@ -1931,7 +1935,7 @@ function synDlg(){const y=S.sync=S.sync||{};y.on=y.on||{};
 
 /* ===== 同期ファイル(アカウント不要。ファイルか、コピーした文字で、端末どうしをそろえる) ===== */
 const synDev=()=>{S.devId=S.devId||uid();return S.devId};
-const synFcats=()=>{const y=S.sync=S.sync||{};y.fon=y.fon||{scen:true,todo:true,memo:true,wish:true,tw:true,chr:true};return SYC.filter(c=>y.fon[c.id]&&(c.id!=="scen"||(S.feat||{}).scen!==false))};
+const synFcats=()=>{const y=S.sync=S.sync||{};y.fon=y.fon||{scen:true,todo:true,memo:true,wish:true,tw:true,chr:true,hab:true,wsh:true};return SYC.filter(c=>y.fon[c.id]&&(c.id!=="scen"||(S.feat||{}).scen!==false))};
 function synPack(){const o={kind:"otomo-sync",v:1,dev:synDev(),at:Date.now(),data:{},known:{}};synFcats().forEach(c=>{o.data[c.id]={items:synLocal(c)}});const fb=(S.sync&&S.sync.fbase)||{};Object.keys(fb).forEach(d=>{o.known[d]=fb[d]});return o}
 /* 取り込み: 「そのファイルを書いた端末が、前回持っていたもの」を基準に、3方向でまとめる */
 async function synImport(pack){
@@ -2308,7 +2312,7 @@ const wantYears=()=>{const c=+today().slice(0,4),set=new Set();for(let y=c-1;y<=
 let wlF="";
 const wlCatOpts=w=>[["","なし"]].concat(S.wantcat.concat(w&&w.cat&&!S.wantcat.includes(w.cat)?[w.cat]:[]).map(k=>[k,k]));
 function wlForm(w){wlMig();const n=!w;w=w||{id:uid(),name:"",cat:"",note:"",done:false,year:wantY};
- form({title:"ウィッシュリスト",del:n?null:()=>{S.wl=S.wl.filter(x=>x!==w);change()},fields:[{k:"name",l:"内容",v:w.name},{k:"cat",l:"分類",type:"sel",opts:wlCatOpts(w),v:w.cat||(n&&wantF!=="-"&&wantF)||""},{k:"year",l:"年",type:"sel",opts:wantYears().map(y=>[y,y+"年"]),v:wantYr(w)},{k:"note",l:"メモ",v:w.note}],
+ form({title:"やりたいこと",del:n?null:()=>{S.wl=S.wl.filter(x=>x!==w);change()},fields:[{k:"name",l:"内容",v:w.name},{k:"cat",l:"分類",type:"sel",opts:wlCatOpts(w),v:w.cat||(n&&wantF!=="-"&&wantF)||""},{k:"year",l:"年",type:"sel",opts:wantYears().map(y=>[y,y+"年"]),v:wantYr(w)},{k:"note",l:"メモ",v:w.note}],
   onOk:v=>{if(!v.name.trim())return false;w.name=v.name.trim();w.cat=v.cat;w.year=v.year;w.note=v.note.trim();if(n)S.wl.push(w);change()}})}
 const WPAL=["#8a4b3c","#4f6b5a","#5b6f8c","#9a7b3a","#7a5a8a","#6b6b6b"];
 const ccol=(k,n)=>{if(k==="k")return catCol(n);const m=S[{t:"tcol",m:"mmcol",w:"wcol"}[k]]||{};if(m[n])return m[n];const i=({t:S.tcat,m:S.mmcat,w:S.wantcat}[k]||[]).indexOf(n);return PAL[(i<0?0:i)%PAL.length]};
@@ -2317,16 +2321,16 @@ const wcolOf=n=>ccol("w",n);
 const wChip=c=>{const k=wcolOf(c);return '<span class="chip" style="border-color:'+k+';background:'+k+'26">'+esc(c)+'</span>'};
 function wlLi(w,no){const k=w.cat?wcolOf(w.cat):"";return '<li class="wi'+(w.done?" bought":"")+'"'+' style="border-left:3px solid '+(k||"transparent")+';padding-left:9px"'+'><span class="no">'+no+'</span><input type="checkbox" data-act="wlchk" data-id="'+w.id+'"'+(w.done?" checked":"")+'><span data-act="wled" data-id="'+w.id+'" style="flex:1;min-width:0">'+esc(w.name||"(無題)")+(w.cat?wChip(w.cat):'')+(w.note?'<small style="margin-left:6px">'+esc(w.note)+'</small>':'')+'</span><button class="ib sm" data-act="wnsend" data-id="'+w.id+'" title="'+(w.sent?"TODOに送りました（もう一度送れます）":"TODOに分けて送る")+'">'+ic(w.sent?"check":"tod")+'</button></li>'}
 function wlBanner(){if(!S.feat.want)return "";wlMig();const y=/^\d{4}$/.test(wantY)?wantY:today().slice(0,4),goal=Math.max(1,S.wlGoal||100),YL=S.wl.filter(w=>wantYr(w)===y),dn=YL.filter(w=>w.done).length;
- return '<button class="wlb" data-act="wnm" title="ウィッシュリストをひらく"><span class="wls">'+ic("star")+'</span><span class="wlt"><b>ウィッシュリスト</b><small>'+y+'年　'+YL.length+'件 ・ 達成 '+dn+' / '+goal+'</small></span><span class="wlp"><i style="width:'+Math.min(100,Math.round(dn/goal*100))+'%"></i></span>'+ic("r")+'</button>'}
+ return '<button class="wlb" data-act="wnm" title="やりたいことリストをひらく"><span class="wls">'+ic("star")+'</span><span class="wlt"><b>やりたいことリスト</b><small>'+y+'年　'+YL.length+'件 ・ 達成 '+dn+' / '+goal+'</small></span><span class="wlp"><i style="width:'+Math.min(100,Math.round(dn/goal*100))+'%"></i></span>'+ic("r")+'</button>'}
 function wlCard(){if(!S.feat.want)return "";wlMig();if(!/^\d{4}$/.test(wantY))wantY=today().slice(0,4);const goal=Math.max(1,S.wlGoal||100),YL=S.wl.filter(w=>wantYr(w)===wantY),dn=YL.filter(w=>w.done).length,ci=w=>{const i=S.wantcat.indexOf(w.cat);return i<0?999:i};
  const L=YL.filter(w=>(wantS==="all"||(wantS==="done")===!!w.done)&&(wantF===""||(wantF==="-"?!w.cat:w.cat===wantF)));
  const srt=wantO==="add"?()=>0:(x,y)=>ci(x)-ci(y);
  let h=L.map((w,i)=>[w,i]).sort((p,q)=>(p[0].done-q[0].done)||srt(p[0],q[0])||(YL.indexOf(p[0])-YL.indexOf(q[0]))).map((p,k)=>wlLi(p[0],wantO==="cat"?k+1:YL.indexOf(p[0])+1)).join("");
  if(wantF===""&&wantS!=="done")for(let i=(wantO==="cat"?L.length:YL.length)+1;i<=goal;i++)h+='<li class="wi slot" data-act="add:wl"><span class="no">'+i+'</span><span style="flex:1">&nbsp;</span></li>';
- return '<section class="card full wn wl"><div class="chd st"><h2>'+ic("wish")+'ウィッシュリスト</h2>'+ib("wantcatedit","tag","分類を編集(色もここで)","sm")+ib("wlgoal","flag","目標の数を変える","sm")+ib("wnm","l","TODOにもどる","sm")+ib("add:wl","plus","ウィッシュを追加","sm")+'</div><div class="body"><div class="wyh">'+ib("wnyp","l","前の年","sm")+'<b>'+wantY+'年</b>'+ib("wnyn","r","次の年","sm")+(wantY!==today().slice(0,4)?ib("wnyt","cal","今年","sm"):"")+'</div><div class="rbar"><span class="rlab" title="絞り込み">'+ic("filter")+'</span>'+fSel("wn_s",wantS,[["act","これから"],["done","完了"],["all","全部"]])
+ return '<section class="card full wn wl"><div class="chd st"><h2>'+ic("wish")+'やりたいことリスト</h2>'+ib("wantcatedit","tag","分類を編集(色もここで)","sm")+ib("wlgoal","flag","目標の数を変える","sm")+ib("wnm","l","TODOにもどる","sm")+ib("add:wl","plus","やりたいことを追加","sm")+'</div><div class="body"><div class="wyh">'+ib("wnyp","l","前の年","sm")+'<b>'+wantY+'年</b>'+ib("wnyn","r","次の年","sm")+(wantY!==today().slice(0,4)?ib("wnyt","cal","今年","sm"):"")+'</div><div class="rbar"><span class="rlab" title="絞り込み">'+ic("filter")+'</span>'+fSel("wn_s",wantS,[["act","これから"],["done","完了"],["all","全部"]])
   +fSel("wn_f",wantF,[["","分類:すべて"]].concat(S.wantcat.map(k=>[k,k]),[["-","分類なし"]]))
   +'<span class="rlab" title="並べ方" style="margin-left:6px">'+ic("sort")+'</span>'+fSel("wn_o",wantO,[["cat","分類順"],["add","追加した順"]])+'</div><div class="sub"><span class="wgl" data-act="wlgoal" style="cursor:pointer" title="目標の数を変える">達成 '+dn+' / '+goal+'</span><span>'+wantY+'年 '+YL.length+'件</span></div><div class="wprog"><i style="width:'+Math.min(100,Math.round(dn/goal*100))+'%"></i></div>'
-  +(h?'<ul class="wlg">'+h+'</ul>':empty("wish","ウィッシュはありません"))+'</div></section>'}
+  +(h?'<ul class="wlg">'+h+'</ul>':empty("wish","やりたいことはありません"))+'</div></section>'}
 function mnPage(){
  const mm=moneyM,t=mTot(mm),y=mm.slice(0,4),yt=mTot(y),[yy,m0]=mm.split("-").map(Number),wi=wInfo();
  const left0='<section class="card full"><div class="chd st"><h2>'+ic("chart")+'内訳</h2></div><div class="body"><div class="sub"><span>'+m0+'月の収支</span><span></span></div>'+sumBox(t)+'<div class="sub"><span>'+y+'年 合計</span><span></span></div>'+sumBox(yt)
@@ -2386,7 +2390,7 @@ function habitBody(){const days=[...Array(7)].map((_,i)=>addDays(hwk,i)),td=toda
 function habitForm(x){const n=!x;x=x||{id:uid(),name:"",goal:3};
  form({title:"習慣",del:n?null:()=>ask("「"+x.name+"」を削除しますか?(記録も消えます)",()=>{S.habits=S.habits.filter(y=>y!==x);delete S.hlog[x.id];change()}),
   fields:[{k:"name",l:"名前",v:x.name,ph:"読書 など"},{k:"goal",l:"目標",type:"sel",opts:[1,2,3,4,5,6,7].map(g=>[String(g),"週"+g+"回"]),v:String(x.goal)}],
-  onOk:v=>{if(!v.name.trim())return false;x.name=v.name.trim();x.goal=+v.goal;if(n)S.habits.push(x);change()}})}
+  onOk:v=>{if(!v.name.trim())return false;x.name=v.name.trim();x.goal=+v.goal;x.upd=Date.now();if(n)S.habits.push(x);change()}})}
 
 /* ===== シナリオのフォルダと書き出し ===== */
 const foldName=s=>{const f=S.sfold.find(x=>x.id===s.fold);return f?f.name:""};
@@ -3071,7 +3075,7 @@ function cardsDlg(){
  $("dlgbox").querySelectorAll("[data-c]").forEach(el=>el.onchange=()=>{if(el.checked)delete S.hidden[el.dataset.c];else S.hidden[el.dataset.c]=true;save();render()});
 }
 function featDlg(){
- openDlg(dtabs("feat")+'<div class="sec">分類</div><button class="rowb" id="f_cats" title="分類を編集">'+ic("tag")+'<span>TODO・メモ・ウィッシュ・金銭の分類</span>'+ic("r")+'</button><div class="sec">使う機能</div><div class="hint">切ると、画面から消えます。データは消えません。</div>'+[["scen","シナリオ執筆"],["gh","GitHubに送る(シナリオの機能)"],["imgx","画像のくわしい設定(フォルダから選ぶなど)"],["want","やりたいこと(TODOのページ)"]].map(o=>'<div class="cr"><input type="checkbox" data-ft="'+o[0]+'"'+(S.feat[o[0]]?" checked":"")+'><span>'+o[1]+'</span></div>').join("")
+ openDlg(dtabs("feat")+'<div class="sec">分類</div><button class="rowb" id="f_cats" title="分類を編集">'+ic("tag")+'<span>TODO・メモ・やりたいこと・金銭の分類</span>'+ic("r")+'</button><div class="sec">使う機能</div><div class="hint">切ると、画面から消えます。データは消えません。</div>'+[["scen","シナリオ執筆"],["gh","GitHubに送る(シナリオの機能)"],["imgx","画像のくわしい設定(フォルダから選ぶなど)"],["want","やりたいこと(TODOのページ)"]].map(o=>'<div class="cr"><input type="checkbox" data-ft="'+o[0]+'"'+(S.feat[o[0]]?" checked":"")+'><span>'+o[1]+'</span></div>').join("")
  +'<div class="sec">左のメニューに出す</div><div class="hint">使わないものは、はずすと隠れます。</div>'+NAV.filter(n=>n[0]!=="home"&&(n[0]!=="scen"||S.feat.scen)).map(n=>'<div class="cr"><input type="checkbox" data-nv="'+n[0]+'"'+(S.navHide[n[0]]?"":" checked")+'><span>'+ic(n[2])+" "+esc(n[1])+'</span></div>').join("")
   +'<div class="btns"><button class="ib" id="dOk" title="とじる">'+ic("x")+'</button></div>');
  $("dOk").onclick=closeDlg;$("f_cats").onclick=()=>{closeDlg();catAllDlg("t")};
@@ -3357,7 +3361,7 @@ document.addEventListener("click",e=>{
   case"mk":moneyK=a.dataset.v;render();return;
   case"hprev":hwk=addDays(hwk,-7);render();return;case"hnext":hwk=addDays(hwk,7);render();return;case"hnow":hwk=wkStart(today());render();return;
   case"hed":{const x=find(S.habits);if(x)habitForm(x);return}
-  case"hday":{const x=find(S.habits);if(!x)return;const d=a.dataset.d,L=S.hlog[x.id]=S.hlog[x.id]||{};if(L[d])delete L[d];else L[d]=1;
+  case"hday":{const x=find(S.habits);if(!x)return;x.upd=Date.now();const d=a.dataset.d,L=S.hlog[x.id]=S.hlog[x.id]||{};if(L[d])delete L[d];else L[d]=1;
    const wk=wkStart(d),cnt=[...Array(7)].filter((_,i)=>L[addDays(wk,i)]).length,pk=x.id+"|"+wk;
    if(cnt>=x.goal&&!S.hpraised[pk]){S.hpraised[pk]=1;change();say("d");return}
    change();return}
