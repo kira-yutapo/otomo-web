@@ -670,6 +670,15 @@ li.dl .dd{display:inline-flex;align-items:center;gap:6px;background:var(--warn);
 .hm2 i.f{background:transparent}.hm2 i.f2{background:transparent;border:1px dashed var(--line)}.hm2 i.t{outline:1px solid var(--tx)}
 .hm2 i.l1{background:color-mix(in srgb,var(--ac) 30%,var(--card))}.hm2 i.l2{background:color-mix(in srgb,var(--ac) 52%,var(--card))}.hm2 i.l3{background:color-mix(in srgb,var(--ac) 76%,var(--card));color:var(--on)}.hm2 i.l4{background:var(--ac);color:var(--on)}
 .ctm{display:inline-flex;align-items:center;gap:4px}.ctm svg{width:1.1em;height:1.1em}.cc .n small.ctm{gap:1px}.cc .n small.ctm svg{width:.95em;height:.95em}
+/* iPhone・スマホで見やすく */
+html{-webkit-text-size-adjust:100%}
+#tb{padding-top:env(safe-area-inset-top)}body{padding-bottom:env(safe-area-inset-bottom)}
+@media (max-width:600px){
+ input[type=text],input[type=number],input[type=date],input[type=time],input[type=password],input[type=search],input[type=url],textarea,select{font-size:16px!important}
+ #chara{right:8px;bottom:6px}#chara img{max-width:min(var(--cs),26vw);max-height:min(var(--cs),22vh)}
+ #chara .bubble{max-width:150px}
+ #dlg{padding:8px}#dlgbox{padding:14px 14px}
+}
 </style>
 </head><body>
 <svg width="0" height="0" style="position:absolute"><defs>
@@ -786,7 +795,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.1";
+const APPV="0.62.3";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -1820,11 +1829,15 @@ const SYC=[
  {id:"scen",nm:"シナリオ",lists:[["scen",["dir"]],["sfold",[]]],ext:null,cp:true},
  {id:"todo",nm:"TODO",lists:[["todos",[]]],ext:["tcat","tcol"],cp:false},
  {id:"memo",nm:"メモ",lists:[["memos",[]]],ext:["mmcat","mmcol"],cp:true},
- {id:"wish",nm:"ウィッシュリスト",lists:[["wl",[]]],ext:["wantcat","wcol","wlGoal"],cp:false}];
+ {id:"wish",nm:"ウィッシュリスト",lists:[["wl",[]]],ext:["wantcat","wcol","wlGoal"],cp:false},
+ {id:"tw",nm:"ひとこと",lists:[["tweets",[]]],ext:null,cp:false},
+ {id:"chr",nm:"キャラクター(画像・セリフ)",lists:[["chars",[]]],ext:null,cp:false,img:true}];
+const synImgKeys=()=>{const ids=new Set((S.chars||[]).map(c=>c.id));return Object.keys(IM).filter(k=>ids.has(k.split(".")[0])&&k.split(".")[0]!=="smp1"&&typeof IM[k]==="string"&&/^data:image\//.test(IM[k]))};
 const synCanon=o=>{if(Array.isArray(o))return"["+o.map(synCanon).join(",")+"]";if(o&&typeof o==="object")return"{"+Object.keys(o).sort().filter(k=>o[k]!==undefined).map(k=>JSON.stringify(k)+":"+synCanon(o[k])).join(",")+"}";const t=JSON.stringify(o);return t===undefined?"null":t};
 const synHash=o=>{const t=synCanon(o);let h=2166136261;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+"."+t.length.toString(36)};
 const synCl=o=>JSON.parse(JSON.stringify(o));
 function synLocal(c){const m={};c.lists.forEach(l=>{(S[l[0]]||[]).forEach(it=>{if(!it||it.id==null)return;const o=synCl(it);l[1].forEach(k=>delete o[k]);m[l[0]+":"+it.id]=o})});
+ if(c.img)synImgKeys().forEach(k=>{m["img:"+k]={id:k,d:IM[k]}});
  if(c.ext){const x={};c.ext.forEach(k=>{if(S[k]!==undefined)x[k]=synCl(S[k])});m._x=x}return m}
 function synUnion(a,b){const o={};new Set(Object.keys(a).concat(Object.keys(b))).forEach(k=>{const x=a[k],y=b[k];
  if(x===undefined)o[k]=y;else if(y===undefined)o[k]=x;
@@ -1848,6 +1861,10 @@ function synApply(c,out){c.lists.forEach(l=>{const nm=l[0],loc=l[1],cur=S[nm]||[
  const have=new Set(keep.map(x=>x.id));
  Object.keys(out).forEach(k=>{if(k.indexOf(nm+":")!==0)return;const o=synCl(out[k]);if(have.has(o.id))return;loc.forEach(q=>{o[q]=(old.get(o.id)||{})[q]!==undefined?old.get(o.id)[q]:""});keep.push(o)});
  S[nm]=keep});
+ if(c.img){const ids=new Set((S.chars||[]).map(x=>x.id));
+  Object.keys(IM).forEach(k=>{if(ids.has(k.split(".")[0])&&k.split(".")[0]!=="smp1"&&typeof IM[k]==="string"&&/^data:image\//.test(IM[k])&&!out["img:"+k]){delete IM[k];delete IMR[k]}});
+  Object.keys(out).forEach(k=>{if(k.indexOf("img:")!==0)return;const o=out[k];if(o&&o.id&&typeof o.d==="string"&&ids.has(String(o.id).split(".")[0])){IM[o.id]=o.d;delete IMR[o.id]}});
+  saveImgs()}
  if(c.ext&&out._x)c.ext.forEach(k=>{if(out._x[k]!==undefined)S[k]=synCl(out._x[k])})}
 const synPath=c=>((S.sync.dir||"otomo-data").replace(/^\/+|\/+$/g,"")+"/"+c.id+".json");
 const synUrl=(c,q)=>"https://api.github.com/repos/"+S.sync.repo+"/contents/"+synPath(c).split("/").map(encodeURIComponent).join("/")+(q||"");
@@ -1914,7 +1931,7 @@ function synDlg(){const y=S.sync=S.sync||{};y.on=y.on||{};
 
 /* ===== 同期ファイル(アカウント不要。ファイルか、コピーした文字で、端末どうしをそろえる) ===== */
 const synDev=()=>{S.devId=S.devId||uid();return S.devId};
-const synFcats=()=>{const y=S.sync=S.sync||{};y.fon=y.fon||{scen:true,todo:true,memo:true,wish:true};return SYC.filter(c=>y.fon[c.id]&&(c.id!=="scen"||(S.feat||{}).scen!==false))};
+const synFcats=()=>{const y=S.sync=S.sync||{};y.fon=y.fon||{scen:true,todo:true,memo:true,wish:true,tw:true,chr:true};return SYC.filter(c=>y.fon[c.id]&&(c.id!=="scen"||(S.feat||{}).scen!==false))};
 function synPack(){const o={kind:"otomo-sync",v:1,dev:synDev(),at:Date.now(),data:{},known:{}};synFcats().forEach(c=>{o.data[c.id]={items:synLocal(c)}});const fb=(S.sync&&S.sync.fbase)||{};Object.keys(fb).forEach(d=>{o.known[d]=fb[d]});return o}
 /* 取り込み: 「そのファイルを書いた端末が、前回持っていたもの」を基準に、3方向でまとめる */
 async function synImport(pack){
