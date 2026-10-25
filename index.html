@@ -671,7 +671,7 @@ li.dl .dd{display:inline-flex;align-items:center;gap:6px;background:var(--warn);
 .hm2 i.l1{background:color-mix(in srgb,var(--ac) 30%,var(--card))}.hm2 i.l2{background:color-mix(in srgb,var(--ac) 52%,var(--card))}.hm2 i.l3{background:color-mix(in srgb,var(--ac) 76%,var(--card));color:var(--on)}.hm2 i.l4{background:var(--ac);color:var(--on)}
 .ctm{display:inline-flex;align-items:center;gap:4px}.ctm svg{width:1.1em;height:1.1em}.cc .n small.ctm{gap:1px}.cc .n small.ctm svg{width:.95em;height:.95em}
 /* せまいと、TODOの名前が縦書きみたいにならない(名前の最小幅を決め、はみ出す分は次の行へ) */
-li:has(>span[data-act]){flex-wrap:wrap;row-gap:2px}li>span[data-act]{min-width:6em;word-break:normal;overflow-wrap:anywhere}
+li:has(>span[data-act]){flex-wrap:wrap;row-gap:2px}li>span[data-act]{flex:0 1 auto;max-width:calc(100% - 9em);margin-right:auto;min-width:3em;word-break:normal;overflow-wrap:anywhere}li:has(>span[data-act]){gap:5px}li:has(>span[data-act])>.tcat{max-width:5.5em;overflow:hidden;text-overflow:ellipsis}
 /* iPhone・スマホで見やすく */
 html{-webkit-text-size-adjust:100%}
 #tb{padding-top:env(safe-area-inset-top)}body{padding-bottom:env(safe-area-inset-bottom)}
@@ -797,7 +797,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.8";
+const APPV="0.62.9";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
