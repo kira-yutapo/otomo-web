@@ -797,7 +797,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.9";
+const APPV="0.62.10";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -2180,7 +2180,7 @@ function lvPos(el,a){let acc=0,last=null;
  if(last){if(last.nodeType===3)return[last,last.data.length];if(!last.textContent)return[last,0];const w=document.createTreeWalker(last,NodeFilter.SHOW_TEXT);let n,t=null;while((n=w.nextNode()))t=n;if(t)return[t,t.data.length]}
  return[el,0]}
 function lvCaretBlk(el){const s=getSelection();if(!s.rangeCount)return null;const r=s.getRangeAt(0);let n=r.startContainer;if(!el.contains(n))return null;if(n===el)return el.children[Math.min(r.startOffset,el.children.length-1)]||null;while(n&&n.parentNode!==el)n=n.parentNode;return n&&n.nodeType===1?n:null}
-function lvOn(el){const a=document.activeElement===el?lvCaretBlk(el):null,h=el.__hv&&el.__hv.isConnected&&!el.__hv.classList.contains("lst")?el.__hv:null;
+function lvOn(el){if(el.__drag)return;const a=document.activeElement===el?lvCaretBlk(el):null,h=el.__hv&&el.__hv.isConnected&&!el.__hv.classList.contains("lst")?el.__hv:null;
  (el.__on||[]).forEach(x=>{if(x!==a&&x!==h)x.classList.remove("on")});const nx=[];if(a){a.classList.add("on");nx.push(a)}if(h&&h!==a){h.classList.add("on");nx.push(h)}el.__on=nx}
 function lvRender(el,v){const sel=v==null&&document.activeElement===el?lvSel(el):null,val=v==null?el.value:String(v).replace(/\r\n?/g,"\n");let hint=null;if(sel){const cb=lvCaretBlk(el);if(cb){hint=0;for(let q=cb.previousElementSibling;q;q=q.previousElementSibling)hint++}}lvPatch(el,val,hint);if(el.__mo)el.__mo.takeRecords();el.__ver++;el.__vc=val;el.__vcv=el.__ver;el.classList.toggle("emp",!val);lvOn(el);if(sel)el.setSelectionRange(sel[0],sel[1])}
 function lvHist(el){if(el.__nh){el.__nh=0;return}const v=el.value,H=el.__h;if(H[H.length-1].v===v)return;const t=Date.now(),sel=lvSel(el)||[v.length,v.length];
@@ -2216,12 +2216,14 @@ function lvAttach(el){if(el.__lv)return;el.__lv=1;el.setAttribute("data-lv","1")
  el.addEventListener("compositionstart",()=>{el.__comp=1});
  el.addEventListener("compositionend",()=>{el.__comp=0;el.__L=null;lvRender(el);lvHist(el);el.dispatchEvent(new Event("input",{bubbles:true}))});
  el.addEventListener("keydown",e=>{if(el.__comp||e.isComposing)return;if((e.ctrlKey||e.metaKey)&&!e.altKey){const k=e.key.toLowerCase();if(k==="z"&&!e.shiftKey){e.preventDefault();lvUndo(el,false)}else if(k==="y"||(k==="z"&&e.shiftKey)){e.preventDefault();lvUndo(el,true)}}});
- el.addEventListener("mousemove",e=>{const b=e.target.closest&&e.target.closest(".lnb");if(b!==el.__hv){el.__hv=b||null;lvOn(el)}});
+ el.addEventListener("mousedown",e=>{if(e.button===0)el.__drag=1},true);
+ el.addEventListener("mousemove",e=>{if(e.buttons){if(el.__drag)return}else if(el.__drag){el.__drag=0;lvOn(el)}const b=e.target.closest&&e.target.closest(".lnb");if(b!==el.__hv){el.__hv=b||null;lvOn(el)}});
  el.addEventListener("mouseleave",()=>{el.__hv=null;lvOn(el)});el.addEventListener("blur",()=>lvOn(el));el.addEventListener("focus",()=>lvOn(el));
  el.addEventListener("mousedown",e=>{if(e.button!==0)return;const b=e.target.closest&&e.target.closest(".lnb");if(!b||b.classList.contains("on"))return;const k=b.querySelector(".hxck");if(!k)return;const kr=k.getBoundingClientRect();if(e.clientX<kr.left-3||e.clientX>kr.left+kr.width+6)return;
   e.preventDefault();const i=[...el.children].indexOf(b),L=el.value.split("\n");if(i<0||i>=L.length)return;L[i]=L[i].replace(/\[([ xX])\]/,(a,c)=>c===" "?"[x]":"[ ]");const sel=lvSel(el)||el.__sel;lvRender(el,L.join("\n"));if(sel&&document.activeElement===el)el.setSelectionRange(sel[0],sel[1]);el.dispatchEvent(new Event("input",{bubbles:true}))});
  el.addEventListener("drop",e=>{if(e.dataTransfer&&[...e.dataTransfer.types].includes("Files"))e.preventDefault()});
 }
+document.addEventListener("mouseup",()=>{document.querySelectorAll("[data-lv]").forEach(el=>{if(el.__drag){el.__drag=0;lvOn(el)}})},true);window.addEventListener("blur",()=>{document.querySelectorAll("[data-lv]").forEach(el=>{if(el.__drag){el.__drag=0;lvOn(el)}})});
 function lvScan(){for(const k of["mm_b","sc_body"]){const e=document.getElementById(k);if(e&&e.classList.contains("lvv")&&!e.__lv)lvAttach(e)}}
 try{new MutationObserver(()=>lvScan()).observe(document.body,{childList:true,subtree:true})}catch(er){}
 document.addEventListener("selectionchange",()=>{const el=document.activeElement;if(el&&el.__lv){const s=lvSel(el);if(s)el.__sel=s;lvOn(el)}});
@@ -3558,7 +3560,8 @@ document.addEventListener("mousedown",e=>{const t=e.target;if(!t.closest)return;
  const bk=t.closest(".blk");if(bk&&bk.classList.contains("ed"))return;e.preventDefault();
  if(bk&&bk.classList.contains("k-flow")){openFlow();return}
  if(bk){const off=blkAdj(+bk.dataset.a),ps=blkClickPos(bk,off,e.clientX,e.clientY);blkOpen(off,ps==null?undefined:ps)}else blkAppend("")});
-document.addEventListener("click",e=>{const w=e.target.id==="scwr"||e.target.id==="scwrp"?e.target:null;if(w)scMargin(e);const o=$("snpop");if(o&&!e.target.closest("#snpop")&&!e.target.closest('[data-act="scsn"],[data-act="schpop"]'))o.remove()});
+let scMdMargin=false;document.addEventListener("mousedown",e=>{scMdMargin=!!(e.target&&(e.target.id==="scwr"||e.target.id==="scwrp"))},true);
+document.addEventListener("click",e=>{const w=(e.target.id==="scwr"||e.target.id==="scwrp")&&scMdMargin&&!(window.getSelection&&String(getSelection()))?e.target:null;if(w)scMargin(e);const o=$("snpop");if(o&&!e.target.closest("#snpop")&&!e.target.closest('[data-act="scsn"],[data-act="schpop"]'))o.remove()});
 document.addEventListener("focusout",e=>{if(e.target.id!=="sc_body"||!blkCur)return;const r=e.relatedTarget;if(r&&r.closest&&r.closest(".tbr"))return;
  setTimeout(()=>{if(blkCur&&document.activeElement!==$("sc_body"))blkCommit()},0)});
 document.addEventListener("click",e=>{const a=e.target.closest("a.il");if(!a||!a.closest("#scpg"))return;e.preventDefault();const t=$("scpg").querySelector(a.getAttribute("href"));if(t)t.scrollIntoView({block:"start"})});
