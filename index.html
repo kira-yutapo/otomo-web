@@ -447,7 +447,7 @@ html[data-nof~="gh"] .fx-gh,html[data-nof~="gh"] [data-act="scgh"]{display:none!
 .lvv.emp::before{content:attr(data-ph);position:absolute;left:0;top:0;opacity:.4;pointer-events:none}
 #mm_b.lvv{padding:18px 22px;border:1px solid var(--line);border-radius:12px;background:var(--inp,transparent);font-size:1.04em;line-height:1.95}
 .lvv .hxm{opacity:.4}.lvv .lnb:not(.on) .hxm{font-size:0;opacity:0}
-.lvv>.lnb{content-visibility:auto;contain-intrinsic-block-size:auto 2em}
+.lvv>.lnb{content-visibility:auto;contain-intrinsic-block-size:auto 2em;scroll-margin-block:2.5em}
 .lvv .hxb{font-weight:700}.lvv .hxi{font-style:italic}.lvv .hxc{background:color-mix(in srgb,currentColor 11%,transparent);border-radius:3px;padding:0 .2em;font-family:ui-monospace,Consolas,monospace;font-size:.92em}
 .lvv .hxl{color:var(--ac);text-decoration:underline}.lvv .hxd{opacity:.5;text-decoration:line-through}
 .lvv .lnb.hh1{font-size:1.75em;font-weight:700;line-height:1.5;margin:.45em 0 .25em;border-bottom:3px double color-mix(in srgb,currentColor 35%,transparent)}
@@ -797,7 +797,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.10";
+const APPV="0.62.13";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -1429,6 +1429,24 @@ function scOp(op){const ta=$("sc_body");if(!ta){if(op==="h")return blkAppend("##
  else if(op==="x"){const nl=a>0&&v[a-1]!=="\n"?"\n":"",p=a+nl.length+4;scRng(ta,a,b,nl+"---\n",p,p)}
  else if(op==="h"){const ls=a?v.lastIndexOf("\n",a-1)+1:0,m=/^(#{1,5}) /.exec(v.slice(ls)),n=m?m[1].length:0,np=n>=5?"":"#".repeat(n+1)+" ",old=m?m[0].length:0;scRng(ta,ls,ls+old,np,Math.max(ls,a+np.length-old),Math.max(ls,b+np.length-old))}}
 function scBox(kind){const ta=$("sc_body");if(!ta)return blkAppend(":::"+kind+"\n本文\n:::");const a=ta.selectionStart,b=ta.selectionEnd,v=ta.value,sel=v.slice(a,b)||"本文",pre=a>0&&v[a-1]!=="\n"?"\n":"",t=pre+":::"+kind+"\n"+sel+"\n:::\n",p=a+pre.length+4+kind.length;scRng(ta,a,b,t,p,p+sel.length)}
+function scBoxChg(q){const ta=$("sc_body");if(!ta){if(!q)notice("本文の編集画面で、枠の中にカーソルを置いてください");return false}
+ const v=ta.value,pos=ta.selectionStart,L=v.split("\n");let off=0,op=null;
+ for(let i=0;i<L.length&&off<=pos;i++){const e=off+L[i].length;
+  if(/^:::[ \t]*$/.test(L[i])){if(op&&e<pos)op=null}
+  else{const m=/^:::[ \t]*(\S+)(?:[ \t]+(.*))?$/.exec(L[i]);if(m)op={off,e,line:L[i],kind:m[1],title:(m[2]||"").trim()}}
+  off=e+1}
+ if(!op){if(!q)notice("囲み枠の中に、カーソルを置いてから押してください");return false}
+ const opts=S.boxes.map(b=>[b.id,b.name]);opts.push(["judge","技能判定(成功・失敗)"]);
+ const kd=S.boxes.find(x=>x.id===op.kind)||S.boxes.find(x=>x.name===op.kind);let cur=kd?kd.id:op.kind;
+ if(!opts.some(x=>x[0]===cur))opts.push([cur,cur+"(灰色の枠)"]);
+ form({title:"この枠を変える",fields:[{k:"kd",l:"枠の種類",type:"sel",opts,v:cur},{k:"tt",l:"題(空なら、種類の名前)",v:op.title,ph:"例: 手紙の内容"}],
+  onOk:f=>{const t=$("sc_body");if(!t)return;const vv=t.value;if(vv.slice(op.off,op.e)!==op.line){notice("本文が変わっていたので、やめました。もう一度試してください");return}
+   const nl=":::"+f.kd+(f.tt.trim()?" "+f.tt.trim().replace(/\s+/g," "):"");scRng(t,op.off,op.e,nl,op.off+nl.length,op.off+nl.length)}});return true}
+document.addEventListener("contextmenu",e=>{const el=e.target&&e.target.closest&&e.target.closest("#sc_body");if(!el||!$("dlg").hidden)return;
+ const sel=getSelection&&String(getSelection());if(sel&&el.__lv)return;
+ if(el.__lv){const b=e.target.closest(".lnb");if(!b||b.parentNode!==el)return;const p=lvOff(el,b,0);el.setSelectionRange(p,p)}
+ else if(el.selectionStart!==el.selectionEnd)return;
+ if(scBoxChg(true))e.preventDefault()},true);
 function scJudge(){const t=":::judge 判定名\n成功: \n失敗: \n:::",ta=$("sc_body");if(!ta)return blkAppend(t);const a=ta.selectionStart,b=ta.selectionEnd,pre=a>0&&ta.value[a-1]!=="\n"?"\n":"",tt=pre+t+"\n",p=a+pre.length+9;scRng(ta,a,b,tt,p,p+3)}
 function scColor(c){const ta=$("sc_body");if(!ta||ta.selectionStart===ta.selectionEnd){notice("色をつける文字を、先に選んでください");return}
  const a=ta.selectionStart,b=ta.selectionEnd,sel=ta.value.slice(a,b).replace(/\{\{#[0-9a-fA-F]{6}\|/g,"").replace(/\}\}/g,""),t=c?sel.split("\n").map(l=>l.trim()?"{{"+c+"|"+l+"}}":l).join("\n"):sel;scRng(ta,a,a+(b-a),t,a,a+t.length)}
@@ -1744,7 +1762,7 @@ function scTodoHtml(s){const L=scTodos(s),op=L.filter(x=>!x.done),dn=L.filter(x=
 function scRight(s){if(!["box","snip","ref","log","npc","todo"].includes(scTab))scTab="box";const t=scTab;
  const tabs='<div class="scT">'+[["box","list","囲み枠","囲み枠"],["snip","snip","スニペット","スニペット"],["npc","users","NPC","NPC"],["todo","check","TODO","TODO"],["ref","book","相談・資料","資料"],["log","memo","試遊の記録","記録"]].map(o=>'<button class="'+(t===o[0]?"on":"")+'" data-act="sctab" data-v="'+o[0]+'" title="'+o[2]+'">'+ic(o[1])+'<span>'+(o[3]||o[2])+'</span>'+'</button>').join("")+'</div>';
  let b="";
- if(t==="box")b='<div class="tochd"><b>囲み枠</b>'+ib("scboxset","edit","枠をふやす・変える","sm")+'</div>'+bxOrd().map((x,i)=>(i===0?'<div class="hint" style="margin:4px 0 2px">標準</div>':"")+(i===bxStd()?'<div class="hint" style="margin:10px 0 2px">囲み枠</div>':"")+(x.id==="__judge"?'<button class="bxp kf" style="--bxc:'+S.jd.t+'" data-act="scjudge"><i></i>技能判定(成功・失敗)</button>':'<button class="bxp kf" style="--bxc:'+x.c+'" data-act="scbox" data-k="'+esc(x.id)+'" title="'+esc(x.name)+'の囲み枠を入れる(右クリックで編集)"><i></i>'+esc(x.name)+'</button>')).join("")
+ if(t==="box")b='<div class="tochd"><b>囲み枠</b>'+ib("scboxchg","tag","いまの枠の種類・題を変える(本文の枠の上で右クリックでもOK)","sm")+ib("scboxset","edit","枠をふやす・変える","sm")+'</div>'+bxOrd().map((x,i)=>(i===0?'<div class="hint" style="margin:4px 0 2px">標準</div>':"")+(i===bxStd()?'<div class="hint" style="margin:10px 0 2px">囲み枠</div>':"")+(x.id==="__judge"?'<button class="bxp kf" style="--bxc:'+S.jd.t+'" data-act="scjudge"><i></i>技能判定(成功・失敗)</button>':'<button class="bxp kf" style="--bxc:'+x.c+'" data-act="scbox" data-k="'+esc(x.id)+'" title="'+esc(x.name)+'の囲み枠を入れる(右クリックで編集)"><i></i>'+esc(x.name)+'</button>')).join("")
   +'<button class="bxp kf" data-act="scflowins"><i></i>フローチャート</button>'+'<div class="tochd"><b>ほか</b></div><button class="bxp kf" data-act="scpre" data-p="- " title="箇条書き"><i></i>箇条書き</button><button class="bxp kf" data-act="scpre" data-p="> " title="引用"><i></i>引用</button>';
  else if(t==="snip")b=snipPane();
  else if(t==="todo")b=scTodoHtml(s);
@@ -2196,7 +2214,7 @@ function lvAttach(el){if(el.__lv)return;el.__lv=1;el.setAttribute("data-lv","1")
   selectionStart:{get(){return(lvSel(el)||el.__sel||[0,0])[0]},configurable:true},selectionEnd:{get(){return(lvSel(el)||el.__sel||[0,0])[1]},configurable:true}});
  el.setSelectionRange=(a,b)=>{const L=el.value.length;a=Math.max(0,Math.min(a,L));b=Math.max(a,Math.min(b==null?a:b,L));el.__sel=[a,b];if(document.activeElement!==el)return;
   const p=lvPos(el,a),q=lvPos(el,b),r=document.createRange();r.setStart(p[0],p[1]);r.setEnd(q[0],q[1]);const s=getSelection();s.removeAllRanges();s.addRange(r);lvOn(el);
-  if(a===b){const n=p[0].parentElement;if(n&&n.scrollIntoView)n.scrollIntoView({block:"nearest"})}};
+  if(a===b){const n0=p[0].nodeType===1?p[0]:p[0].parentElement,n=n0&&n0.closest?(n0.closest(".lnb")||n0):n0;if(n&&n!==el&&n.scrollIntoView)n.scrollIntoView({block:"nearest"})}};
  el.setRangeText=(t,s0,e0,mode)=>{const v=el.value,cs=lvSel(el)||el.__sel||[0,0],sel=cs[0],se=cs[1],a=s0==null?sel:s0,b=e0==null?se:e0;lvRender(el,v.slice(0,a)+t+v.slice(b));
   let p;if(mode==="select")p=[a,a+t.length];else if(mode==="start")p=[a,a];else if(mode==="end")p=[a+t.length,a+t.length];else{const f=x=>x<=a?x:(x>=b?x+t.length-(b-a):a+t.length);p=[f(sel),f(se)]}el.setSelectionRange(p[0],p[1])};
  el.select=()=>el.setSelectionRange(0,el.value.length);
@@ -3274,6 +3292,7 @@ document.addEventListener("click",e=>{
   case"screstore":unfocus();exitFull();change();setTimeout(flPlace,30);return;
   case"sclook":return scLookDlg();
   case"scfont":return scFontDlg();
+  case"scboxchg":scBoxChg();return;
   case"scboxset":return boxDlg();
   case"scnbopen":{const {s}=scSel();if(s)openExt(/^https?:\/\//i.test(s.nbu||"")?s.nbu:"https://notebooklm.google.com/");return}
   case"scflowl":{if(!S.scen.some(x=>x.id===id))return;scFReset();verAuto(S.scen.find(x=>x.id===id));S.scenCur=id;if(!S.scOpen.includes(id))S.scOpen.push(id);scMode="edit";scTab="box";if(S.scf.auto)enterFull();save();render();$("main").scrollTop=0;openFlow();return}
