@@ -120,11 +120,11 @@ li>span{flex:1;min-width:0;word-break:break-all;cursor:pointer}
 li small{color:var(--sub);font-size:.82em;white-space:nowrap}
 li.done>span{text-decoration:line-through;color:var(--sub)}li.done>span.tcat{text-decoration:none;color:var(--tx);opacity:.75}
 li.over small,li.over>span{color:var(--warn)}
-li.p2{background:color-mix(in srgb,#d62c1a 12%,transparent);border-radius:6px;box-shadow:inset 3px 0 0 #d62c1a}li.p2>span[data-act=edt]{font-weight:700}
+li.p2{background:color-mix(in srgb,var(--warn) 11%,transparent);border-radius:6px}li.p2>span[data-act=edt]{font-weight:700}
 .pri{border:1px solid var(--bd,currentColor);border-radius:9px;padding:0 6px;font-size:.78em;white-space:nowrap;display:inline-flex;align-items:center;gap:2px;margin-left:4px}.pri .i{width:11px;height:11px}
-.pri.p1{color:#b87a00;border-color:#d08a00}.pri.p2{color:#fff;background:#d62c1a;border-color:#d62c1a;font-weight:700}
-.sctd.p2{background:color-mix(in srgb,var(--warn) 13%,transparent);border-radius:6px;box-shadow:inset 3px 0 0 var(--warn)}.sctd.p2 .sctx{font-weight:700}
-li[data-sk=todo]:not(.done){cursor:default}li.srtd{opacity:.5}li.srt-b{box-shadow:0 -2px 0 var(--ac)}li.srt-a{box-shadow:0 2px 0 var(--ac)}li.p2.srt-b{box-shadow:inset 3px 0 0 #d62c1a,0 -2px 0 var(--ac)}li.p2.srt-a{box-shadow:inset 3px 0 0 #d62c1a,0 2px 0 var(--ac)}
+.pri.p1{color:#b87a00;border-color:#d08a00}.pri.p2{color:#fff;background:var(--warn);border-color:var(--warn);font-weight:700}
+.sctd.p2{background:color-mix(in srgb,var(--warn) 11%,transparent);border-radius:6px}.sctd.p2 .sctx{font-weight:700}
+li[data-sk=todo]:not(.done){cursor:default}li.srtd{opacity:.5}li.srt-b{box-shadow:0 -2px 0 var(--ac)}li.srt-a{box-shadow:0 2px 0 var(--ac)}
 .ib[data-act=tpri]{opacity:.55}.ib[data-act=tpri].s1,.ib[data-act=tpri].s2{opacity:1;background:none;border-color:transparent}
 .ib[data-act=tpri].s1{color:#d08a00}.ib[data-act=tpri].s2{color:#d62c1a}.ib[data-act=tpri].s2 svg{fill:currentColor}.ib[data-act=tpri].s1 svg,.ib[data-act=tpri].s2 svg{stroke-width:2.2}
 li.ev .t{flex:none;color:color-mix(in srgb,var(--ac) 80%,var(--tx));font-weight:700;font-size:.9em;white-space:nowrap;cursor:default}
@@ -305,7 +305,7 @@ li.cur{background:color-mix(in srgb,var(--ac) 14%,transparent);border-radius:6px
 .bd.fe{padding-right:24px}.bd svg.bf{right:9px}
 .stk{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line);margin:4px 0 8px}.stk i{display:block;height:100%}
 .lgl{margin:0;padding:0;max-height:none}.lgl li{border:0;padding:3px 2px;gap:8px}.lgl .sw{margin:0}.lgl .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lgl .pc{color:var(--sub);font-size:.85em;width:3em;text-align:right;flex:none}.lgl .vv{font-variant-numeric:tabular-nums;white-space:nowrap}
-.gh{font-size:.8em;color:var(--sub);border:0!important;padding:8px 2px 0!important;letter-spacing:1px}.tcat{color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:0 6px;font-size:.75em}
+.gh{font-size:.8em;color:var(--sub);border:0!important;padding:8px 2px 0!important;letter-spacing:1px}.tcat{color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:0 6px;font-size:.75em;white-space:nowrap;flex:none}
 .mncol{overflow:auto}.mnv .mncol>.card,.mnv .mncol>.card:first-child,.mnv .mncol>.card:last-child{flex:none;height:auto;min-height:0;overflow:visible}
 @media (max-width:900px){.mncol{overflow:visible}}
 li.pd{font-size:.85em;color:var(--sub)}li.pd .ib{width:24px;height:24px}
@@ -669,6 +669,28 @@ li.dl .dd{display:inline-flex;align-items:center;gap:6px;background:var(--warn);
 #grid [data-id=tw] .tw{padding:6px 4px;gap:8px;font-size:.86em;line-height:1.5}#grid [data-id=tw] .twa{width:28px;height:28px}#grid [data-id=tw] #tw_in{font-size:.88em;margin-bottom:4px;padding:6px 10px}
 .verp{white-space:pre-wrap;word-break:break-all;max-height:42vh;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.88em;line-height:1.7;margin:6px 0 10px;background:color-mix(in srgb,var(--tx) 4%,transparent)}
 .hd{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.hrow{padding:4px 0 3px;border-bottom:0}.hrow .hh{margin-bottom:2px;line-height:1.2}.hday{width:100%;height:22px;border-radius:6px;padding:0;font-size:.58em;line-height:1;flex:none}.hday.td{outline:1px solid var(--tx);outline-offset:1px}
+.hrow{padding:7px 9px 6px;margin-bottom:7px;border:1px solid var(--line);border-radius:10px;background:transparent}.hrow.ok{background:color-mix(in srgb,var(--ac) 12%,transparent);border-color:color-mix(in srgb,var(--ac) 55%,transparent)}
+.hrow .hh{margin-bottom:4px}.hrow .hc{font-size:.85em;color:var(--sub);display:flex;align-items:center;gap:4px}.hrow.ok .hc{color:var(--ac);font-weight:700}.hrow .hok{display:inline-flex;align-items:center;gap:2px}.hrow .hok .i{width:13px;height:13px}
+.hbar{height:4px;border-radius:2px;background:color-mix(in srgb,var(--tx) 14%,transparent);margin-bottom:6px;overflow:hidden}.hbar i{display:block;height:100%;background:var(--ac);border-radius:2px}
+.hrow .hd{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.hrow .hday,.hrow .hday.on{display:flex;flex-direction:column;align-items:center;gap:3px;width:auto;height:auto;padding:2px 0;border:0;background:none;color:var(--tx);font-weight:400;font-size:1em;outline:0}
+.hrow .hday em{font-style:normal;font-size:.72em;color:var(--sub);line-height:1}.hrow .hday.td em{color:var(--tx);font-weight:700}
+.hrow .hday b{width:24px;height:24px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--tx) 35%,transparent);display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.hrow .hday:hover b{border-color:var(--ac)}.hrow .hday.on b{background:var(--ac);border-color:var(--ac);color:var(--on)}.hrow .hday b .i{width:14px;height:14px;stroke-width:2.6}
+.hseg{display:flex;align-items:center;gap:6px;margin-bottom:8px}.hseg b{font-size:.95em}
+.hw{display:flex;flex-direction:column;gap:6px}.hwh,.hwr{display:grid;grid-template-columns:minmax(8em,1.5fr) repeat(7,minmax(28px,1fr));gap:5px;align-items:center}
+.hwh span{display:flex;flex-direction:column;align-items:center;line-height:1.15;color:var(--sub)}.hwh em{font-style:normal;font-size:.72em}.hwh b{font-size:.9em;font-weight:600;min-width:1.7em;text-align:center;border-radius:999px;padding:1px 0}.hwh .td{color:var(--tx)}.hwh .td b{background:var(--ac);color:var(--on)}
+.hwr{padding:6px 8px;border:1px solid var(--line);border-radius:12px}.hwr.idle{opacity:.6}
+.hwn{display:flex;align-items:center;gap:7px;min-width:0;cursor:pointer}.hwn>div{min-width:0;display:flex;flex-direction:column}.hwn b{font-size:.95em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hwn small,.hmcard>small{font-size:.76em;color:var(--sub);display:flex;align-items:center;gap:2px}.hwn small.late,.hmcard>small.late{color:var(--warn);font-weight:700}.hwn small .i{width:12px;height:12px}
+.hdot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--c);display:inline-block;margin-right:2px}.hwn .hdot{margin:0}
+.hwc{aspect-ratio:1;width:100%;max-width:38px;margin:0 auto;border-radius:9px;border:0;padding:0;background:color-mix(in srgb,var(--c) 16%,transparent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}.hwc:hover{background:color-mix(in srgb,var(--c) 34%,transparent)}.hwc.on{background:var(--c)}.hwc .i{width:16px;height:16px;stroke-width:2.6}.hwc.td{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--c)}
+.hmg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}.hmcard{border:1px solid var(--line);border-radius:14px;padding:10px 12px 12px}.hmt{display:flex;align-items:center;gap:6px;margin-bottom:2px}.hmt .hn{flex:1;font-weight:700;cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hct{display:inline-flex;align-items:center;gap:3px;font-weight:700;color:var(--c)}.hct .i{width:14px;height:14px}
+.hmw,.hmcs{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.hmw{margin-top:8px}.hmw em{font-style:normal;font-size:.7em;color:var(--sub);text-align:center}.hmcs{margin-top:3px}.hmcs .f{display:block}
+.hmc{aspect-ratio:1;border:0;padding:0;border-radius:7px;font-size:.78em;background:color-mix(in srgb,var(--c) 13%,transparent);color:var(--tx);cursor:pointer}.hmc:hover{background:color-mix(in srgb,var(--c) 32%,transparent)}.hmc.on{background:var(--c);color:#fff;font-weight:700}.hmc.td{box-shadow:0 0 0 2px var(--card),0 0 0 3px var(--c)}
+@media (max-width:560px){.hwh,.hwr{grid-template-columns:minmax(5.5em,1.2fr) repeat(7,minmax(22px,1fr));gap:3px}}
+.hrow.idle{opacity:.62}.hmeta{font-size:.8em;color:var(--sub);margin:-1px 0 4px}.hmeta.late{color:var(--warn);font-weight:700}
+.hmo{display:flex;flex-wrap:wrap;gap:2px;margin-top:6px}.hmo i{width:9px;height:9px;border-radius:2px;border:1px solid color-mix(in srgb,var(--tx) 30%,transparent);box-sizing:border-box}.hmo i.on{background:var(--ac);border-color:var(--ac)}.hmo i.td{outline:1.5px solid var(--tx);outline-offset:1px}
+.hrow .hday.td b{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--ac)}
 #side .tl button:not(.on) svg{color:var(--ac)}
 .tw{position:relative}.twx{display:flex;gap:2px;align-items:flex-start;opacity:0;transition:opacity .12s;flex:none}.tw:hover .twx,.tw:focus-within .twx,.tw.on .twx{opacity:1}@media (hover:none){.twx{opacity:1}}
 .fbar{display:flex;align-items:center;gap:6px;margin:4px 0 10px}.fsum{flex:1;min-width:0;font-size:.85em;color:var(--sub);overflow-wrap:anywhere}
@@ -682,10 +704,10 @@ li.dl .dd{display:inline-flex;align-items:center;gap:6px;background:var(--warn);
 .hm2 i.l1{background:color-mix(in srgb,var(--ac) 30%,var(--card))}.hm2 i.l2{background:color-mix(in srgb,var(--ac) 52%,var(--card))}.hm2 i.l3{background:color-mix(in srgb,var(--ac) 76%,var(--card));color:var(--on)}.hm2 i.l4{background:var(--ac);color:var(--on)}
 .ctm{display:inline-flex;align-items:center;gap:4px}.ctm svg{width:1.1em;height:1.1em}.cc .n small.ctm{gap:1px}.cc .n small.ctm svg{width:.95em;height:.95em}
 /* せまいと、TODOの名前が縦書きみたいにならない(名前の最小幅を決め、はみ出す分は次の行へ) */
-li:has(>span[data-act]){flex-wrap:wrap;row-gap:2px}li>span[data-act]{flex:0 1 auto;max-width:calc(100% - 9em);margin-right:auto;min-width:3em;word-break:normal;overflow-wrap:anywhere}li:has(>span[data-act]){gap:5px}li:has(>span[data-act])>.tcat{max-width:5.5em;overflow:hidden;text-overflow:ellipsis}
+li:has(>span[data-act]){flex-wrap:wrap;row-gap:2px}li>span[data-act]{flex:0 1 auto;max-width:calc(100% - 9em);margin-right:auto;min-width:3em;word-break:normal;overflow-wrap:anywhere}li:has(>span[data-act]){gap:5px}li:has(>span[data-act])>.tcat{max-width:8em;overflow:hidden;text-overflow:ellipsis}
 /* iPhone・スマホで見やすく */
 html{-webkit-text-size-adjust:100%}
-#tb{padding-top:env(safe-area-inset-top)}body{padding-bottom:env(safe-area-inset-bottom)}
+#tb{padding-top:max(5px,env(safe-area-inset-top))}body{padding-bottom:env(safe-area-inset-bottom)}
 @media (max-width:600px){
  input[type=text],input[type=number],input[type=date],input[type=time],input[type=password],input[type=search],input[type=url],textarea,select{font-size:16px!important}
  #chara{right:8px;bottom:6px}#chara img{max-width:min(var(--cs),26vw);max-height:min(var(--cs),22vh)}
@@ -828,7 +850,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.68";
+const APPV="0.62.75";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -941,7 +963,7 @@ function ownSet(k,on){const s=scCtx();if(!s)return;const re=()=>{s.upd=Date.now(
  if(on){s.own=s.own||{};if(s.own[k])return;const cl=o=>JSON.parse(JSON.stringify(o));s.own[k]=k==="bx"?{list:cl(S.boxes),jd:cl(S.jd)}:k==="sn"?cl(S.snips):{pre:S.dsn.pre||"",css:S.dsn.css||""};re()}
  else{if(!(s.own&&s.own[k]))return;ask("このシナリオだけの設定を消して、ぜんぶ共通の設定にもどしますか?",()=>{delete s.own[k];re()})}}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("#dlgbox [data-own]");if(!b)return;const p=b.dataset.own.split(":");ownSet(p[0],p[1]==="1")});
-const NAV=[["home","ホーム","home"],["todo","TODO","list"],["wl","やりたいこと","star"],["cal","カレンダー","cal"],["scen","シナリオ","pen"],["money","金銭","coin"],["req","依頼","brief"],["memo","メモ","memo"]];
+const NAV=[["home","ホーム","home"],["todo","TODO","list"],["wl","やりたいこと","star"],["habit","習慣","leaf"],["cal","カレンダー","cal"],["scen","シナリオ","pen"],["money","金銭","coin"],["req","依頼","brief"],["memo","メモ","memo"]];
 const NAVT={tools:"ブックマーク・ツール",log:"作業ログ",memo:"メモ"};
 const DEFL={c:["なにか用?","呼んだ?","ふふ、くすぐったい。"],d:["ひとつ完了。おつかれさま!","いいぞ、その調子。"],g:["今日も卓を囲もう。","準備はできた?"],f:["集中しよう!","よーい、スタート。"],b:["ひと休みしよう。","おつかれさま!"],t:["ひとつ完了。","いいぞ、その調子。"],r:["依頼、おつかれさま!","納品、完了だね。"],h:["今週の目標、達成!","習慣、よく続いたね。"],u:["新しい版 {v} があります。","新しい版が来たよ。"]};
 const GCOL=["#b5533c","#4f7a6a","#4a6a96"];
@@ -2600,15 +2622,42 @@ function subMonthForm(s,ym){
   onOk:v=>{const a=Math.round(Math.abs(parseFloat(v.amt)));if(!a||!v.date)return false;S.money.push({id:uid(),date:v.date,kind:s.kind,amt:a,cat:s.cat,note:s.name,sub:s.id,ym});change()}})}
 
 /* ===== 習慣 ===== */
-function habitBody(){const days=[...Array(7)].map((_,i)=>addDays(hwk,i)),td=today();
+const habCnt=(x,ref)=>{const L=S.hlog[x.id]||{};if(x.per==="m"){const st=repNext(ref,"m-1");return Object.keys(L).filter(k=>L[k]&&k>st&&k<=ref).length}if(x.per==="b"){let c=0;for(let i=0;i<14;i++)if(L[addDays(ref,-i)])c++;return c}const wk=wkStart(ref);return [...Array(7)].filter((_,i)=>L[addDays(wk,i)]).length};
+const habLab=x=>x.per==="m"?"月":x.per==="b"?"2週":"";
+function habDue(x){const L=S.hlog[x.id]||{},ks=Object.keys(L).filter(k=>L[k]).sort(),last=ks.length?ks[ks.length-1]:"";if(!x.per)return{last,due:""};if(!last)return{last,due:today()};const g=Math.max(1,x.goal|0);
+ const due=g===1?(x.per==="m"?repNext(last,"m1"):addDays(last,14)):addDays(last,Math.max(1,Math.round((x.per==="m"?30:14)/g)));return{last,due}}
+function habMonth(x,ref){const L=S.hlog[x.id]||{},y=+ref.slice(0,4),m=+ref.slice(5,7),n=new Date(y,m,0).getDate();let o="";for(let i=1;i<=n;i++){const d=ref.slice(0,7)+"-"+pad(i);o+='<i class="'+(L[d]?"on":"")+(d===today()?" td":"")+'" title="'+md(d)+'"></i>'}return '<div class="hmo" title="'+m+'月">'+o+'</div>'}
+function repNext(d,r,day){const u=r.charAt(0),n=+r.slice(1)||1;if(u==="d")return addDays(d,n);if(u==="w")return addDays(d,7*n);
+ let y=+d.slice(0,4),m=+d.slice(5,7)-1+n;y+=Math.floor(m/12);m=((m%12)+12)%12;const dd=day||+d.slice(8,10),last=new Date(y,m+1,0).getDate();return y+"-"+pad(m+1)+"-"+pad(Math.min(dd,last))}
+let hview="w",hmon=today().slice(0,7);
+const habCol=x=>x.col||PAL[Math.max(0,S.habits.indexOf(x))%PAL.length];
+function habSub(x,ref,days){const lg=S.hlog[x.id]||{},cnt=habCnt(x,ref),ok=cnt>=x.goal;if(x.per){const hd=habDue(x);return '<small class="'+(hd.due&&hd.due<=today()?"late":"")+'">前回 '+(hd.last?md(hd.last):"まだ")+'　次 '+md(hd.due)+'('+dueTxt(hd.due)+')</small>'}return '<small>'+(ok?ic("check")+" ":"")+cnt+'/'+x.goal+' 週'+x.goal+'回</small>'}
+function habPage(){const td=today(),days=[...Array(7)].map((_,i)=>addDays(hwk,i)),ref=days.includes(td)?td:days[6];
+ const [my,mm]=hmon.split("-").map(Number);
+ let h='<div class="segs hseg"><span style="flex:1"></span>'+ib("hmprev","l","前の月","sm")+'<b>'+my+'年'+mm+'月</b>'+ib("hmnext","r","次の月","sm")+(hmon===td.slice(0,7)?"":ib("hmnow","cal","今月","sm"))+'<span style="flex:1"></span></div>';
+ if(!S.habits.length)return h+empty("leaf","習慣なし");
+ if(false){
+  h+='<div class="hw"><div class="hwh"><span></span>'+days.map((d,j)=>'<span class="'+(d===td?"td":"")+'"><em>'+"月火水木金土日"[j]+'</em><b>'+(+d.slice(8))+'</b></span>').join("")+'</div>';
+  h+=S.habits.map(x=>{const lg=S.hlog[x.id]||{},c=habCol(x),idle=x.per&&!days.some(d=>lg[d])&&habDue(x).due>days[6];
+   return '<div class="hwr'+(idle?" idle":"")+'" style="--c:'+c+'"><div class="hwn" data-act="hed" data-id="'+x.id+'" title="直す・消す"><i class="hdot"></i><div><b>'+esc(x.name)+'</b>'+habSub(x,ref,days)+'</div></div>'+days.map(d=>'<button class="hwc'+(lg[d]?" on":"")+(d===td?" td":"")+'" data-act="hday" data-id="'+x.id+'" data-d="'+d+'" title="'+md(d)+(lg[d]?"(やった)":"")+'">'+(lg[d]?ic("check"):"")+'</button>').join("")+'</div>'}).join("")+'</div>';
+  return h}
+ const first=(new Date(my,mm-1,1).getDay()+6)%7,dim=new Date(my,mm,0).getDate();
+ h+='<div class="hmg">'+S.habits.map(x=>{const lg=S.hlog[x.id]||{},c=habCol(x);let n=0,cells="";for(let i=0;i<first;i++)cells+='<i class="f"></i>';
+  for(let d=1;d<=dim;d++){const ds=hmon+"-"+pad(d),on=!!lg[ds];if(on)n++;cells+='<button class="hmc'+(on?" on":"")+(ds===td?" td":"")+'" data-act="hday" data-id="'+x.id+'" data-d="'+ds+'" title="'+md(ds)+(on?"(やった)":"")+'">'+d+'</button>'}
+  return '<div class="hmcard" style="--c:'+c+'"><div class="hmt"><span class="hn" data-act="hed" data-id="'+x.id+'" title="直す・消す"><i class="hdot"></i>'+esc(x.name)+'</span><span class="hct">'+ic("check")+n+'回</span></div>'+(x.per?habSub(x,ref,days):'<small>週'+x.goal+'回の目標</small>')+'<div class="hmw">'+"月火水木金土日".split("").map(w=>'<em>'+w+'</em>').join("")+'</div><div class="hmcs">'+cells+'</div></div>'}).join("")+'</div>';
+ return h}
+function habitBody(full){if(full)return habPage();const days=[...Array(7)].map((_,i)=>addDays(hwk,i)),td=today();
  const h='<div class="mnav" style="margin:0 0 8px">'+ib("hprev","l","前の週","sm")+'<b>'+md(days[0])+' 〜 '+md(days[6])+'</b>'+ib("hnext","r","次の週","sm")+(days.includes(td)?"":ib("hnow","cal","今週","sm"))+'</div>';
  if(!S.habits.length)return h+empty("leaf","習慣なし");
- return h+S.habits.map(x=>{const lg=S.hlog[x.id]||{},cnt=days.filter(d=>lg[d]).length,ok=cnt>=x.goal;
-  return '<div class="hrow'+(ok?" ok":"")+'"><div class="hh"><span data-act="hed" data-id="'+x.id+'" class="hn">'+esc(x.name)+'</span><span class="hc">'+(ok?ic("check")+" ":"")+cnt+'/'+x.goal+'</span></div><div class="hd">'+days.map((d,j)=>'<button class="hday'+(lg[d]?" on":"")+(d===td?" td":"")+'" data-act="hday" data-id="'+x.id+'" data-d="'+d+'" title="'+md(d)+'">'+"月火水木金土日"[j]+'</button>').join("")+'</div></div>'}).join("")}
+ const ref=days.includes(td)?td:days[6];
+ const vis=S.habits.filter(x=>full||!x.per||days.some(d=>(S.hlog[x.id]||{})[d])||habDue(x).due<=days[6]);
+ if(!vis.length)return h+empty("leaf","今週やる習慣はありません");
+ return h+vis.map(x=>{const lg=S.hlog[x.id]||{},cnt=habCnt(x,ref),ok=cnt>=x.goal,pc=Math.min(100,Math.round(cnt/Math.max(1,x.goal)*100)),hd=habDue(x),idle=full&&x.per&&!days.some(d=>lg[d])&&hd.due>days[6];
+  return '<div class="hrow'+(ok?" ok":"")+(idle?" idle":"")+'"><div class="hh"><span data-act="hed" data-id="'+x.id+'" class="hn">'+esc(x.name)+'</span><span class="hc">'+(ok?'<span class="hok">'+ic("check")+'達成</span> ':'')+(habLab(x)?'<small title="'+(x.per==="m"?"直近1か月のうち":"直近2週間のうち")+'">'+habLab(x)+' </small>':'')+cnt+'/'+x.goal+'</span></div>'+(full&&x.per?'<div class="hmeta'+(hd.due&&hd.due<=td?" late":"")+'">前回 '+(hd.last?md(hd.last):"まだ")+'　次 '+md(hd.due)+'('+dueTxt(hd.due)+')</div>':'')+'<div class="hbar"><i style="width:'+pc+'%"></i></div><div class="hd">'+days.map((d,j)=>'<button class="hday'+(lg[d]?" on":"")+(d===td?" td":"")+'" data-act="hday" data-id="'+x.id+'" data-d="'+d+'" title="'+md(d)+(lg[d]?"(やった)":"")+'"><em>'+"月火水木金土日"[j]+'</em><b>'+(lg[d]?ic("check"):"")+'</b></button>').join("")+'</div>'+(full?habMonth(x,ref):'')+'</div>'}).join("")}
 function habitForm(x){const n=!x;x=x||{id:uid(),name:"",goal:3};
  form({title:"習慣",del:n?null:()=>ask("「"+x.name+"」を削除しますか?(記録も消えます)",()=>{S.habits=S.habits.filter(y=>y!==x);delete S.hlog[x.id];change()}),
-  fields:[{k:"name",l:"名前",v:x.name,ph:"読書 など"},{k:"goal",l:"目標",type:"sel",opts:[1,2,3,4,5,6,7].map(g=>[String(g),"週"+g+"回"]),v:String(x.goal)}],
-  onOk:v=>{if(!v.name.trim())return false;x.name=v.name.trim();x.goal=+v.goal;x.upd=Date.now();if(n)S.habits.push(x);change()}})}
+  fields:[{k:"name",l:"名前",v:x.name,ph:"読書 など"},{k:"goal",l:"目標",type:"sel",opts:[1,2,3,4,5,6,7].map(g=>["w"+g,"週"+g+"回"]).concat([1,2,3,4].map(g=>["b"+g,"2週間に"+g+"回"]),[1,2,3,4].map(g=>["m"+g,"月に"+g+"回"])),v:(x.per||"w")+x.goal}],
+  onOk:v=>{if(!v.name.trim())return false;x.name=v.name.trim();x.per=v.goal.charAt(0)==="w"?undefined:v.goal.charAt(0);if(!x.per)delete x.per;x.goal=+v.goal.slice(1);x.upd=Date.now();if(n)S.habits.push(x);change()}})}
 
 /* ===== シナリオのフォルダと書き出し ===== */
 const foldName=s=>{const f=S.sfold.find(x=>x.id===s.fold);return f?f.name:""};
@@ -2880,7 +2929,7 @@ function cardBody(id,full){
   return '<div class="sub"><span>'+md(td)+'</span><span>'+ev.length+'件</span></div>'+(ev.length?'<ul>'+ev.map(e=>evLi(e)).join("")+'</ul>':empty("clock","予定なし"))
    +(dl.length?'<div class="dlh"><span>'+ic("flag")+'締切</span><small>7日先まで</small></div><ul>'+dl.map(x=>'<li class="dl'+(x.d<td?" ov":x.d===td?" tdy":"")+'"><span data-act="'+x.a+'" data-id="'+x.id+'">'+esc(x.t)+'</span><small class="tcat">'+esc(x.c)+'</small><b class="dd">'+md(x.d)+'<em>'+dueTxt(x.d)+'</em></b></li>').join("")+'</ul>':'')}
  case"cal":return calSmall();
- case"habit":return habitBody();
+ case"habit":return habitBody(full===true);
  case"req":return reqBody(full);
  case"scen":{const l=S.scen.slice().sort((a,b)=>b.upd-a.upd),n=S.scen.filter(s=>s.status==="wip").length;
   return '<div class="sub"><span></span><span>執筆中 '+n+'件</span></div>'+(l.length?'<ul>'+l.slice(0,30).map(s=>'<li class="ses"><span class="m" data-act="scgo" data-id="'+s.id+'"><b>'+esc(s.title||"(無題)")+'</b>'+(s.system?'<span class="chip">'+esc(s.system)+'</span>':'')+'<span class="chip">'+stName(s.status)+'</span><span class="n">'+scChars(s)+'字 · '+md(ymd(new Date(s.upd)))+'</span></span></li>').join("")+'</ul>':empty("book","シナリオなし"))}
@@ -3616,10 +3665,10 @@ document.addEventListener("click",e=>{
   case"mprev":return moneyMove(-1);case"mnext":return moneyMove(1);
   case"mthis":moneyM=today().slice(0,7);render();return;
   case"mk":moneyK=a.dataset.v;render();return;
-  case"hprev":hwk=addDays(hwk,-7);render();return;case"hnext":hwk=addDays(hwk,7);render();return;case"hnow":hwk=wkStart(today());render();return;
+  case"hview":hview=a.dataset.v==="m"?"m":"w";render();return;case"hmprev":{const[y,m]=hmon.split("-").map(Number);const d=new Date(y,m-2,1);hmon=d.getFullYear()+"-"+pad(d.getMonth()+1);render();return}case"hmnext":{const[y,m]=hmon.split("-").map(Number);const d=new Date(y,m,1);hmon=d.getFullYear()+"-"+pad(d.getMonth()+1);render();return}case"hmnow":hmon=today().slice(0,7);render();return;case"hprev":hwk=addDays(hwk,-7);render();return;case"hnext":hwk=addDays(hwk,7);render();return;case"hnow":hwk=wkStart(today());render();return;
   case"hed":{const x=find(S.habits);if(x)habitForm(x);return}
   case"hday":{const x=find(S.habits);if(!x)return;x.upd=Date.now();const d=a.dataset.d,L=S.hlog[x.id]=S.hlog[x.id]||{};if(L[d])delete L[d];else L[d]=1;
-   const wk=wkStart(d),cnt=[...Array(7)].filter((_,i)=>L[addDays(wk,i)]).length,pk=x.id+"|"+wk;
+   const wk=wkStart(d),cnt=habCnt(x,d),pk=x.id+"|"+(x.per==="m"?"m"+d.slice(0,7):x.per==="b"?"b"+wk:wk);
    if(cnt>=x.goal&&!S.hpraised[pk]){S.hpraised[pk]=1;change();say("d");return}
    change();return}
   case"wnsend":{const w=find(S.wl);if(!w)return;
