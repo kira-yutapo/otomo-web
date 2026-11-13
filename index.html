@@ -854,7 +854,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.76";
+const APPV="0.62.78";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -2575,6 +2575,16 @@ function wlCard(){if(!S.feat.want)return "";wlMig();if(!/^\d{4}$/.test(wantY))wa
   +fSel("wn_f",wantF,[["","分類:すべて"]].concat(S.wantcat.map(k=>[k,k]),[["-","分類なし"]]))
   +'<span class="rlab" title="並べ方" style="margin-left:6px">'+ic("sort")+'</span>'+fSel("wn_o",wantO,[["cat","分類順"],["add","追加した順"]])+'</div><div class="sub"><span class="wgl" data-act="wlgoal" style="cursor:pointer" title="目標の数を変える">達成 '+dn+' / '+goal+'</span><span>'+wantY+'年 '+YL.length+'件</span></div><div class="wprog"><i style="width:'+Math.min(100,Math.round(dn/goal*100))+'%"></i></div>'
   +(h?'<ul class="wlg">'+h+'</ul>':empty("wish","やりたいことはありません"))+'</div></section>'}
+function mnPlan(mm,kind){const td=today(),L=[];
+ S.subs.forEach(s=>{if(!s.on||(kind&&s.kind!==kind))return;if(s.start&&mm<s.start)return;
+  if(s.cyc==="y"&&!(s.renew&&mm.slice(5)===s.renew.slice(5,7)&&mm>=s.renew.slice(0,7)))return;
+  if(S.money.some(e=>e.sub===s.id&&e.ym===mm)||S.subskip.includes(s.id+"|"+mm))return;
+  const d=mm+"-"+pad(Math.min(28,s.day||1));
+  if(s.var){if(mm<=td.slice(0,7))L.push({s,d:mm<td.slice(0,7)?mm+"-28":d,mm,v:1})}
+  else if(d>td)L.push({s,d,mm})});
+ return L.sort((a,b)=>b.d.localeCompare(a.d))}
+function mnPli(p){const s=p.s;
+ return '<li class="pd"><span class="d" style="flex:none;color:var(--sub);font-size:.85em;cursor:default">'+md(p.d)+'</span><span data-act="'+(p.v?"submon":"subed")+'" data-id="'+s.id+'" data-ym="'+p.mm+'" style="flex:1;min-width:0">'+esc(s.name)+'<span class="chip" style="opacity:.7">'+(p.v?"未入力":"予定")+'</span></span><b class="amt" style="opacity:.6">'+(p.v?"金額未定":(s.kind==="in"?"+":"-")+yen(s.amt))+'</b></li>'}
 function mnPage(){
  const mm=moneyM,t=mTot(mm),y=mm.slice(0,4),yt=mTot(y),[yy,m0]=mm.split("-").map(Number),wi=wInfo();
  const left0='<section class="card full"><div class="chd st"><h2>'+ic("chart")+'内訳</h2></div><div class="body"><div class="sub"><span>'+m0+'月の収支</span><span></span></div>'+sumBox(t)+'<div class="sub"><span>'+y+'年 合計</span><span></span></div>'+sumBox(yt)
@@ -2584,7 +2594,8 @@ function mnPage(){
  wish='<section class="card full"><div class="chd st"><h2>'+ic("wish")+'ウィッシュリスト</h2>'+(S.wish.some(w=>w.done)?ib("wishdone","check",wishDone?"購入ずみをかくす":"購入ずみを見る("+S.wish.filter(w=>w.done).length+"件)","sm"+(wishDone?" on":"")):"")+ib("add:wish","plus","ウィッシュを追加","sm")+'</div><div class="body"><div class="sub"><span>未購入 '+wi.n+'件</span><span>'+yen(wi.sum)+'</span></div>'+(S.wish.some(w=>wishDone||!w.done)?'<ul>'+S.wish.filter(w=>wishDone||!w.done).sort((a,b)=>(a.done-b.done)).map(wishLi).join("")+'</ul>':empty("wish","ウィッシュなし"))+'</div></section>';
  let rb;
  {const l=S.money.filter(e=>e.date.slice(0,7)===mm&&(!moneyK||e.kind===moneyK)).sort((a,b)=>b.date.localeCompare(a.date));
-  rb='<div class="segs">'+[["","全部"],["in","収入"],["out","支出"]].map(o=>'<button class="seg'+(moneyK===o[0]?" on":"")+'" data-act="mk" data-v="'+o[0]+'">'+o[1]+'</button>').join("")+'</div>'+(l.length?'<ul>'+l.map(mnLi).join("")+'</ul>':empty("coin","記録なし"))}
+  const pl=mnPlan(mm,moneyK);
+  rb='<div class="segs">'+[["","全部"],["in","収入"],["out","支出"]].map(o=>'<button class="seg'+(moneyK===o[0]?" on":"")+'" data-act="mk" data-v="'+o[0]+'">'+o[1]+'</button>').join("")+'</div>'+(l.length||pl.length?'<ul>'+pl.map(mnPli).join("")+l.map(mnLi).join("")+'</ul>':empty("coin","記録なし"))}
  const left='<div class="mncol">'+left0+wish+'</div>';
  const right='<section class="card full"><div class="chd st"><h2>'+ic("coin")+'金銭管理</h2>'+ib("mexp","ul","確定申告用に書き出す","sm")+ib("mcat","tag","分類を編集","sm")+ib("add:money","plus","収支を追加","sm")+'</div><div class="body"><div class="mnav" style="margin:0 0 8px">'+ib("mprev","l","前の月","")+'<b>'+yy+'年'+m0+'月</b>'+ib("mnext","r","次の月","")+ib("mthis","cal","今月","")+'</div>'+rb+'</div></section>';
  return '<div class="mnv">'+left+'<div class="mncol">'+subCard()+right+'</div></div>'}
@@ -2605,7 +2616,7 @@ function applyRecurring(){const td=today(),cm=td.slice(0,7);let ch=false;
 function pendingMonths(s){if(!s.on||!s.var)return[];const cm=today().slice(0,7),L=[];let ym=s.start||cm;
  for(let n=0;n<240&&ym<=cm;n++){if(!S.money.some(e=>e.sub===s.id&&e.ym===ym)&&!S.subskip.includes(s.id+"|"+ym))L.push(ym);ym=nextYm(ym)}
  return L.slice(-6)}
-let subT="out";
+let subT="out",homeML=0;
 function subCard(){const act=S.subs.filter(s=>s.on&&!s.var),fo=act.filter(s=>s.kind==="out").reduce((p,s)=>p+(+s.amt||0),0),fi=act.filter(s=>s.kind==="in").reduce((p,s)=>p+(+s.amt||0),0);
  const li=S.subs.filter(s=>s.kind===subT).map(s=>'<li class="'+(s.on?"":"done")+'"><span data-act="subed" data-id="'+s.id+'" style="flex:1;min-width:0">'+esc(s.name)+'</span><span class="nxt">'+(subNext(s)?'次回 '+md(subNext(s)):'')+'</span><b class="amt '+(s.kind==="in"?"pos":"neg")+'">'+(s.var?"月ごと":(s.kind==="in"?"+":"-")+yen(s.amt))+'</b></li>'
   +pendingMonths(s).map(ym=>'<li class="pd"><span style="flex:1">'+(+ym.slice(5))+'月分 未入力</span><button class="ib sm" data-act="submon" data-id="'+s.id+'" data-ym="'+ym+'" title="金額を入れる">'+ic("plus")+'</button></li>').join("")).join("");
@@ -2938,7 +2949,11 @@ function cardBody(id,full){
  case"scen":{const l=S.scen.slice().sort((a,b)=>b.upd-a.upd),n=S.scen.filter(s=>s.status==="wip").length;
   return '<div class="sub"><span></span><span>執筆中 '+n+'件</span></div>'+(l.length?'<ul>'+l.slice(0,30).map(s=>'<li class="ses"><span class="m" data-act="scgo" data-id="'+s.id+'"><b>'+esc(s.title||"(無題)")+'</b>'+(s.system?'<span class="chip">'+esc(s.system)+'</span>':'')+'<span class="chip">'+stName(s.status)+'</span><span class="n">'+scChars(s)+'字 · '+md(ymd(new Date(s.upd)))+'</span></span></li>').join("")+'</ul>':empty("book","シナリオなし"))}
  case"money":{const mm=td.slice(0,7),t=mTot(mm);
-  return '<div data-act="nav" data-v="money" style="cursor:pointer" title="金銭管理を開く">'+sumBox(t)+'</div><div class="sub"><span>支出の内訳</span><span>'+(+mm.slice(5))+'月</span></div>'+catBars(mCats(mm,"out").slice(0,4),t.o)}
+  const hs='<div class="segs">'+[[0,"内訳"],[1,"支出一覧"]].map(o=>'<button class="seg'+((homeML?1:0)===o[0]?" on":"")+'" data-act="hml" data-v="'+o[0]+'">'+o[1]+'</button>').join("")+'</div>';
+  let bd;if(homeML){const l=S.money.filter(e=>e.date.slice(0,7)===mm&&e.kind==="out").sort((a,b)=>b.date.localeCompare(a.date)),pl=mnPlan(mm,"out");
+   bd=(l.length||pl.length)?'<ul>'+pl.map(mnPli).join("")+l.map(mnLi).join("")+'</ul>':'<div class="empty" style="padding:14px 0">今月の支出はまだありません</div>'}
+  else bd='<div class="sub"><span>支出の内訳</span><span>'+(+mm.slice(5))+'月</span></div>'+catBars(mCats(mm,"out").slice(0,4),t.o);
+  return '<div data-act="nav" data-v="money" style="cursor:pointer" title="金銭管理を開く">'+sumBox(t)+'</div>'+hs+bd}
  case"wish":{const wi=wInfo(),l=S.wish.filter(w=>!w.done);
   return '<div class="sub"><span>未購入 '+wi.n+'件</span><span>'+yen(wi.sum)+'</span></div>'+(l.length?'<ul style="max-height:240px;overflow:auto">'+l.map(wishLi).join("")+'</ul>':empty("wish","ウィッシュなし(＋で追加)"))}
  case"log":{const mon=td.slice(0,7);let mm=0,tot=0;for(const k in S.log){tot+=S.log[k];if(k.slice(0,7)===mon)mm+=S.log[k]}
@@ -3665,6 +3680,7 @@ document.addEventListener("click",e=>{
   case"mexp":return yayoiDlg();
   case"subed":{const s=find(S.subs);if(s)subForm(s);return}
   case"submon":{const s=find(S.subs);if(s)subMonthForm(s,a.dataset.ym);return}
+  case"hml":homeML=+a.dataset.v;render();return;
   case"mned":{const t=find(S.money);if(t)moneyForm(t);return}
   case"mprev":return moneyMove(-1);case"mnext":return moneyMove(1);
   case"mthis":moneyM=today().slice(0,7);render();return;
@@ -3904,9 +3920,9 @@ document.addEventListener("pointercancel",()=>{bdr=null;document.querySelectorAl
 if(!window.api)["bMin","bMax","bClose"].forEach(i=>$(i).hidden=true);
 else window.api.setPin(!!S.pin);
 let pinT=0;const pinRe=()=>{if(!(window.api&&S.pin))return;const n=Date.now();if(n-pinT<1500)return;pinT=n;try{Promise.resolve(window.api.setPin(true)).catch(()=>{})}catch(e){}};
-["focus","blur","resize"].forEach(t=>window.addEventListener(t,()=>{pinRe();setTimeout(()=>{pinT=0;pinRe()},700)}));
+["focus","blur"].forEach(t=>window.addEventListener(t,()=>{pinRe();setTimeout(()=>{pinT=0;pinRe()},700)}));
 document.addEventListener("visibilitychange",()=>{pinT=0;pinRe()});
-setInterval(()=>{pinT=0;pinRe()},20000);
+setInterval(()=>{if(S.mini)return;pinT=0;pinRe()},20000);
 if(innerWidth<700)S.side=true;
 applyTheme();applyFont();render();setTimeout(()=>say("g"),400);setTimeout(bkRemind,2500);
 if(window.api)setTimeout(()=>gSync(false),1500);
