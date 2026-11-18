@@ -797,6 +797,7 @@ html{-webkit-text-size-adjust:100%}
 <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
 <symbol id="i-split" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM12 5v14"/></symbol>
 <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></symbol>
+<symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM3 3l18 18"/></symbol>
 <symbol id="i-cols" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9.3 5v14M14.7 5v14"/></symbol>
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/></symbol>
 <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 4l2.4 5 5.4.7-4 3.7 1 5.4-4.8-2.7-4.8 2.7 1-5.4-4-3.7 5.4-.7z"/></symbol>
@@ -854,7 +855,7 @@ const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>ymd(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return ymd(d)};
-const APPV="0.62.78";
+const APPV="0.62.82";
 const UPD_ON=false,UPD_REPO="kira-yutapo/otomo-share";
 let UPD=null,updBusy=false;
 const updOn=()=>UPD_ON&&!!(window.api&&window.api.applyUpdate);
@@ -1056,7 +1057,7 @@ if(!S.memos.some(m=>m.id===S.memoCur))S.memoCur=S.memos.length?S.memos[0].id:"";
 if(!Array.isArray(S.mmOpen))S.mmOpen=[];S.mmOpen=S.mmOpen.filter((i,k,a)=>S.memos.some(m=>m.id===i)&&a.indexOf(i)===k);if(S.memoCur&&!S.mmOpen.includes(S.memoCur))S.mmOpen.push(S.memoCur);
 if(!S.scen.some(s=>s.id===S.scenCur))S.scenCur=S.scen.length?S.scen[0].id:"";
 if(!S.v105){if(S.font===FKEYS[0])S.font="Zen Kaku Gothic New(すっきり)";if(!S.chars.length){S.chars=[SMP_CHAR()];S.curChar="smp1";IM.smp1=SMP_IMG;try{localStorage.setItem(IMK,JSON.stringify(IM))}catch(e){}}S.v105=true}
-if(S.charMode==="random"&&S.chars.length)S.curChar=pick(S.chars).id;
+if(S.charMode==="random"&&S.chars.length){const pl=S.chars.filter(c=>!c.noRand);if(pl.length)S.curChar=pick(pl).id}
 if(!FONTS[S.font])S.font=FKEYS[0];
 const curC=()=>S.chars.find(c=>c.id===S.curChar)||S.chars[0];
 const TP=()=>S.tp.find(p=>p.id===S.tpCur)||S.tp[0];
@@ -3233,7 +3234,7 @@ function lnTools(c){const box=$("dlgbox"),h=box&&box.querySelector("h3");if(!h)r
    msg(n+"行を取り込みました。"+(r.head?"":"見出しがなかったので、「キャラを押したとき」に入れました。")+"問題なければ、決定を押してください")};
    fr.readAsArrayBuffer(fl)};f.click()}}
 function charDlg(){
- const rows=S.chars.map(c=>'<div class="cr2'+(c.id===S.curChar?" on":"")+'" data-sel="'+c.id+'" title="このキャラにする"><img data-img="'+c.id+'" alt=""><span class="nm">'+esc(c.name)+'</span>'+(c.id===S.curChar?'<span class="chip">いま</span>':'')+'<button class="ib sm" data-ed="'+c.id+'" title="編集(セリフ・表情)">'+ic("edit")+'</button></div>').join("");
+ const rows=S.chars.map(c=>'<div class="cr2'+(c.id===S.curChar?" on":"")+'" data-sel="'+c.id+'" title="このキャラにする"><img data-img="'+c.id+'" alt=""><span class="nm">'+esc(c.name)+'</span>'+(c.id===S.curChar?'<span class="chip">いま</span>':'')+'<button class="seg'+(c.noRand?" on":"")+'" data-nr="'+c.id+'" style="flex:none;padding:0 10px;white-space:nowrap" title="'+(c.noRand?"ランダムに出す":"ランダムでは出さない")+'">ランダムなし</button><button class="ib sm" data-ed="'+c.id+'" title="編集(セリフ・表情)">'+ic("edit")+'</button></div>').join("");
  openDlg('<div class="sec">キャラクター(押すとそのキャラになります)</div><div class="crl">'+(rows||'<div class="empty">'+ic("user")+'キャラなし(下の「＋」で追加)</div>')+'</div>'
   +'<div class="sec">表示</div><label class="fl" for="cd_cs">大きさ</label><div class="sndf"><input type="range" id="cd_cs" min="80" max="360" step="10" value="'+S.cs+'"><button class="ib sm" id="cd_csr" title="もとの大きさにもどす">'+ic("reset")+'</button></div>'
   +'<label class="fl" for="cd_ms">ミニモードの大きさ</label><div class="sndf"><input type="range" id="cd_ms" min="100" max="300" step="10" value="'+numIn(S.msz,230,100,300)+'"><button class="ib sm" id="cd_msr" title="もとの大きさにもどす">'+ic("reset")+'</button></div>'
@@ -3245,6 +3246,8 @@ function charDlg(){
  $("cd_msr").onclick=()=>{S.msz=230;$("cd_ms").value=230;save();cache.mini=null;render()};$("cd_ms").oninput=e=>{S.msz=numIn(e.target.value,230,100,300);save();cache.mini=null;render()};
  $("dNo").onclick=closeDlg;$("dAdd").onclick=()=>charForm(null,true);
  if($("dSmp"))$("dSmp").onclick=()=>{IM.smp1=SMP_IMG;if(!saveImgs())return;S.chars.push(SMP_CHAR());S.curChar="smp1";S.charShow=true;change();charDlg()};
+
+ $("dlgbox").querySelectorAll("[data-nr]").forEach(b=>b.onclick=e=>{e.stopPropagation();const c=S.chars.find(x=>x.id===b.dataset.nr);if(c){c.noRand=!c.noRand;save();charDlg()}});
  $("dlgbox").querySelectorAll("[data-sel]").forEach(r=>r.onclick=e=>{if(e.target.closest("[data-ed]"))return;S.curChar=r.dataset.sel;S.charShow=true;closeDlg();change();setTimeout(()=>say("g"),80)});
  $("dlgbox").querySelectorAll("[data-ed]").forEach(b=>b.onclick=e=>{e.stopPropagation();charForm(S.chars.find(x=>x.id===b.dataset.ed),true)})}
 function addForm(id){
